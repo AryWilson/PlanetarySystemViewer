@@ -2,7 +2,7 @@
 
 Launch an interactive, 3d model of a planetary system
 
-TODO: Add a representative image
+Representative image
 
 ## How to build
 
@@ -40,8 +40,22 @@ To run each program from build, you would type
 PlanetarySystemViewer/build $ ../bin/viewer
 ```
 
-## Demo of basic features
+## Features
 
+Background implemented with cubemap
 
+Unique textures and meshes
 
-## Unique features 
+Launch a viewer with orbiting planets
+
+Rotate and zoom abilities
+
+Click on different planets
+
+Phong shading
+
+Area lighting
+
+Particle system tracks orbits
+
+## Images
