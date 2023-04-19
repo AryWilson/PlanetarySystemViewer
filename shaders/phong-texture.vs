@@ -7,7 +7,7 @@ out vec3 nEye;
 out vec2 uv;
 uniform mat4 ModelViewMatrix;
 uniform mat3 NormalMatrix;
-// uniform mat4 ProjectionMatrix;
+uniform mat4 ProjMatrix;
 uniform mat4 MVP;
 void main()
 {

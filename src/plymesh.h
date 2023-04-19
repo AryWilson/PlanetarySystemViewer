@@ -47,6 +47,10 @@ namespace agl {
       // face indices in this model
       const std::vector<GLuint>& indices() const;
 
+      const std::vector<GLfloat>& uv() const;
+
+      bool hasUV() const;
+
    protected:
       void init();
 

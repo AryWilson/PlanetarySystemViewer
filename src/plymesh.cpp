@@ -137,8 +137,8 @@ namespace agl {
             _normals.push_back(stof(matches[4]));
             _normals.push_back(stof(matches[5]));
             _normals.push_back(stof(matches[6]));
-            _uv.push_back(stof(matches[5]));
-            _uv.push_back(stof(matches[6]));
+            _uv.push_back(stof(matches[7]));
+            _uv.push_back(stof(matches[8]));
          }
       }
       for(int i = 0; i<nfaces;){
@@ -202,5 +202,13 @@ namespace agl {
 
    const std::vector<GLuint>& PLYMesh::indices() const {
       return _faces;
+   }
+
+   const vector<GLfloat>& PLYMesh::uv() const {
+      return _uv;
+   }
+
+   bool PLYMesh::hasUV() const {
+      return !(_uv.size() == 0);
    }
 }

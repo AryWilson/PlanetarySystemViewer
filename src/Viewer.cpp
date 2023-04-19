@@ -20,13 +20,20 @@ struct Material{
    float ka;
    float kd;
    float ks;
-   vec3 col;
    float alpha;
 };
 
 struct Light{
    vec3 pos;
    vec3 col;
+};
+
+struct Planet{
+   // position, velocity, redius, texture
+   float size;
+   float radius;
+   float vel;
+   String texture;
 };
 
 class Viewer : public Window {
@@ -36,22 +43,27 @@ public:
       eyePos = vec3(7, 0, 0);
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
-      mesh = PLYMesh("../models/sphere.ply");
+      mesh = PLYMesh("../models/planet.ply");
 
       radius = 10;
       azimuth = 0;
       elevation = 0;
-      material = {0.2f,0.8f,0.5f,vec3(0.4f,0.4f,0.8f),10.0f};
+      material = {0.2f,0.8f,0.5f,10.0f};
       light = {vec3(0.0f,0.0f,0.0f), vec3(1.0f,1.0f,1.0f)};
-
+      planets();
    }
 
    void setup() {
+      
       renderer.loadShader("phong-texture","../shaders/phong-texture.vs","../shaders/phong-texture.vs");
       renderer.loadShader("phong-pixel","../shaders/phong-pixel.vs","../shaders/phong-pixel.vs");
       renderer.loadShader("flat","../shaders/flat.vs","../shaders/flat.vs");
-      renderer.loadCubeMap();
-      renderer.loadTexture("bricks","textures/bricks.png",0);
+      // renderer.loadCubeMap();
+      textures = GetFilenamesInDir("../textures", "png");
+
+      for(int i =0; i<textures.size(); i++){
+         renderer.loadTexture(textures[i],"textures/"+textures[i],i);
+      }
 
    }
 
@@ -68,6 +80,15 @@ public:
          if(elevation>=M_PI_2){elevation = M_PI_2 - 0.01f;}
          if(elevation<=-1*M_PI_2){elevation = -1*M_PI_2 + 0.01f;}
       } 
+   }
+
+   void planets(){
+      Planet a = {1.0f/12, 3.0f, 1.0f, "planet"};
+      Planet b = {1.0f/5, 6.0f, 0.5f, "planet"};
+      Planet c = {1.0f/8, 10.0f, 0.1f, "planet"};
+      planets.push_back(a);
+      planets.push_back(b);
+      planets.push_back(c);
    }
 
    void mouseDown(int button, int mods) {
@@ -125,26 +146,40 @@ public:
       float bbZlen = abs(bbMax.z - bbMin.z);
       float d = std::max(bbXlen,std::max(bbYlen,bbZlen));
 
-      renderer.push();
+      renderer.push(); // push identity
       renderer.scale(vec3(1.0f/d, 1.0f/d, 1.0f/d));
       renderer.translate(vec3(-1*bbCentx,-1*bbCenty,-1*bbCentz));
-      renderer.push();
+      renderer.push(); // push star matrix
 
       renderer.mesh(mesh);
       renderer.endShader();
 
       // ---PLANETS---
-      renderer.pop(); //temp
+      renderer.pop(); // get matrix for star
       renderer.beginShader("phong-pixel");
-      // renderer.texture("diffuseTexture", "bricks"); //?
+      if(mesh.hasUV){
+         renderer.beginShader("phong-texture");
+      } else {
+         renderer.beginShader("phong-pixel");
+      }
+      float theta = elapsedTime()/20.0f;
 
-      renderer.translate(vec3(5*cos(elapsedTime()),5*sin(elapsedTime()),0));
-      renderer.scale(vec3(1.0f/5, 1.0f/5, 1.0f/5));
-      renderer.scale(vec3(1.0f/d, 1.0f/d, 1.0f/d));
-      renderer.translate(vec3(-1*bbCentx,-1*bbCenty,-1*bbCentz));
+      for(Planet planet : planets){
+         renderer.push(); //save matrix for star
+         if(mesh.hasUV){
+            renderer.texture("diffuseTexture", planet.texture); //?
+         }
+         float r = planet.radius;
+         float v = planet.vel;
+         float s = planet.size;
+         renderer.translate(vec3(r*cos(v*theta),0,r*sin(v*theta)));
+         renderer.scale(vec3(s, s, s));
+         renderer.mesh(mesh);
+         rederer.pop() //reset to str matrix 
+      }
 
+      renderer.pop(); // reset to identity
 
-      renderer.mesh(mesh);
       renderer.endShader();
 
       //scale, rotate, translate
@@ -170,16 +205,16 @@ public:
       
       renderer.setUniform("ViewMatrix", renderer.viewMatrix());
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
+      // renderer.setUniform("ModelViewMatrix", renderer.);
+      // renderer.setUniform("NormalMatrix", renderer.);
       renderer.setUniform("eyePos", eyePos);
       renderer.setUniform("material.kd", material.kd);
       renderer.setUniform("material.ks", material.ks);
       renderer.setUniform("material.ka", material.ka);
-      renderer.setUniform("material.col", material.col);
       renderer.setUniform("material.alpha", material.alpha);
       renderer.setUniform("light.pos", light.pos);
       renderer.setUniform("light.col", light.col);
 
-      // all primitives draw here will use the current shader
       renderer.endShader();
 
    }
@@ -194,6 +229,7 @@ protected:
    float elevation; // in [-90, 90]
    Material material;
    Light light;
+   vector<Planet> planets;
 };
 
 // void fnExit(){ }
