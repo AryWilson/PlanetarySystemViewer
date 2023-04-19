@@ -7,7 +7,6 @@ layout (location = 2) in vec2 vTextureCoords;
 uniform mat3 NormalMatrix;
 uniform mat4 ModelViewMatrix;
 uniform mat4 MVP;
-uniform bool HasUV;
 
 
 //inputs: pos, normal, 

@@ -43,9 +43,8 @@ public:
       eyePos = vec3(7, 0, 0);
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
-      // mesh = PLYMesh("../models/sphere.ply");
-      // shaders = {"unlit","phong-pixel", "phong-texture"};
-      shaders = {"unlit"};
+      mesh = PLYMesh("../models/planet.ply");
+      shaders = {"unlit","phong-pixel", "phong-texture"};
 
 
       radius = 10;
@@ -160,69 +159,60 @@ public:
       // float bbZlen = abs(bbMax.z - bbMin.z);
       // float d = std::max(bbXlen,std::max(bbYlen,bbZlen));
 
-      // // renderer.push(); // push identity
+      // renderer.push(); // push identity
       // renderer.scale(vec3(1.0f/d, 1.0f/d, 1.0f/d));
       // renderer.translate(vec3(-1*bbCentx,-1*bbCenty,-1*bbCentz));
       // renderer.push(); // push star matrix
 
       // renderer.mesh(mesh);
-      renderer.lookAt(eyePos,lookPos,upDir);
-      renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
       renderer.sphere();
+
 
       renderer.endShader();
 
-      // // ---PLANETS---
+      // ---PLANETS---
       // renderer.pop(); // get matrix for star
-      // renderer.beginShader("phong-pixel");
+      renderer.beginShader("phong-pixel");
       // if(mesh.hasUV()){
       //    renderer.beginShader("phong-texture");
       // } else {
       //    renderer.beginShader("phong-pixel");
       // }
-      // float theta = elapsedTime()/20.0f;
+      float theta = elapsedTime()/20.0f;
+      renderer.translate(vec3(cos(.5f*theta),sin(.5f*theta),0));
+      renderer.scale(vec3(.5f, .5f, .5f));
+      // renderer.mesh(mesh);
+      renderer.sphere();
 
       // for(int i = 0; i < planets.size(); i++){
       //    renderer.push(); //save matrix for star
-      //    if(mesh.hasUV()){
-      //       renderer.texture("diffuseTexture", planets[i].texture); //?
-      //    }
+      //    // if(mesh.hasUV()){
+      //    //    renderer.texture("diffuseTexture", planets[i].texture); //?
+      //    // }
       //    float r = planets[i].radius;
       //    float v = planets[i].vel;
       //    float s = planets[i].size;
       //    renderer.translate(vec3(r*cos(v*theta),0,r*sin(v*theta)));
       //    renderer.scale(vec3(s, s, s));
-      //    renderer.mesh(mesh);
+      //    // renderer.mesh(mesh);
+      //    renderer.sphere();
       //    renderer.pop(); //reset to str matrix 
       // }
 
       // renderer.pop(); // reset to identity
 
-      // renderer.endShader();
+      renderer.endShader();
 
-      //scale, rotate, translate
-      // renderer.lookAt(eyePos,lookPos,upDir);
-      // renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
-
-
-
-      // begin shader sun
-      // set up moodel matrix move sun to center
-      // begin shader planets
-      // set texture
-      // set up moodel matrix (get spheres where they should be)
-      //    set up times orbits
-      // lookat
-      // perspective
-      // renderer.mesh(sphere)
-      // end shader planets
-    
+      // scale, rotate, translate
+      renderer.lookAt(eyePos,lookPos,upDir);
+      renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
 
       
 
       
       renderer.setUniform("ViewMatrix", renderer.viewMatrix());
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
+      // renderer.setUniform("HasUV", mesh.hasUV());
       // renderer.setUniform("ModelViewMatrix", renderer.);
       // renderer.setUniform("NormalMatrix", renderer.);
       // renderer.setUniform("eyePos", eyePos);
@@ -233,7 +223,6 @@ public:
       renderer.setUniform("light.pos", light.pos);
       renderer.setUniform("light.col", light.col);
 
-      renderer.endShader();
 
    }
 
