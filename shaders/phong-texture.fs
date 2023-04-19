@@ -28,10 +28,7 @@ in vec3 nEye;
 in vec2 uv;
 
 out vec4 FragColor;
-// void main(){
-// vec3 c = color * texture(diffuseTexture, uv*10.0f).xyz; // float determines wrap, negative inverts
-// FragColor= vec4(c, 1.0);
-// }
+
 
 void main() {
    vec4 texColor = texture( diffuseTexture, uv );
