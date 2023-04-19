@@ -43,7 +43,7 @@ public:
       eyePos = vec3(7, 0, 0);
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
-      mesh = PLYMesh("../models/planet.ply");
+      mesh = PLYMesh("../models/sphere.ply");
       shaders = {"unlit","phong-pixel", "phong-texture"};
 
 
@@ -52,20 +52,24 @@ public:
       elevation = 0;
       material = {0.2f,0.8f,0.5f,10.0f};
       light = {vec3(0.0f,0.0f,0.0f), vec3(1.0f,1.0f,1.0f)};
-      // initPlanets();
+
+      
+
    }
 
    void setup() {
       for(string s : shaders){
          renderer.loadShader(s, "../shaders/"+s+".vs", "../shaders/"+s+".fs");
       }
-      
       // renderer.loadCubeMap();
-      // textures = GetFilenamesInDir("../textures", "png");
+      textures = GetFilenamesInDir("../textures", "png");
+      
 
       for(int i =0; i<textures.size(); i++){
          renderer.loadTexture(textures[i],"textures/"+textures[i],i);
       }
+      
+      initPlanets();
 
    }
 
@@ -86,15 +90,15 @@ public:
 
    void initPlanets(){
       Planet a,b,c;
-      a.size = 1.0f/12;
-      b.size = 1.0f/5;
-      c.size = 1.0f/8;
+      a.size = 1.0f/10;
+      b.size = 1.0f/3;
+      c.size = 1.0f/5;
       a.radius = 3.0f;
-      b.radius = 6.0f;
-      c.radius = 10.0f;
-      a.vel = 1.0f;
-      b.vel = 0.5;
-      c.vel = 0.1f;
+      b.radius = 5.0f;
+      c.radius = 7.0f;
+      a.vel = 0.8f;
+      b.vel = 0.5f;
+      c.vel = 0.3f;
       a.texture = textures[0];
       b.texture = textures[0];
       c.texture = textures[0];
@@ -178,26 +182,23 @@ public:
       // } else {
       //    renderer.beginShader("phong-pixel");
       // }
-      float theta = elapsedTime()/20.0f;
-      renderer.translate(vec3(cos(.5f*theta),sin(.5f*theta),0));
-      renderer.scale(vec3(.5f, .5f, .5f));
-      // renderer.mesh(mesh);
-      renderer.sphere();
+      float theta = elapsedTime();
 
-      // for(int i = 0; i < planets.size(); i++){
-      //    renderer.push(); //save matrix for star
-      //    // if(mesh.hasUV()){
-      //    //    renderer.texture("diffuseTexture", planets[i].texture); //?
-      //    // }
-      //    float r = planets[i].radius;
-      //    float v = planets[i].vel;
-      //    float s = planets[i].size;
-      //    renderer.translate(vec3(r*cos(v*theta),0,r*sin(v*theta)));
-      //    renderer.scale(vec3(s, s, s));
-      //    // renderer.mesh(mesh);
-      //    renderer.sphere();
-      //    renderer.pop(); //reset to str matrix 
-      // }
+
+      for(int i = 0; i < planets.size(); i++){
+         renderer.push(); //save matrix for star
+         // if(mesh.hasUV()){
+         //    renderer.texture("diffuseTexture", planets[i].texture); //?
+         // }
+         float r = planets[i].radius;
+         float v = planets[i].vel;
+         float s = planets[i].size;
+         renderer.translate(vec3(r*cos(v*theta),0,r*sin(v*theta)));
+         renderer.scale(vec3(s, s, s));
+         // renderer.mesh(mesh);
+         renderer.sphere();
+         renderer.pop(); //reset to str matrix 
+      }
 
       // renderer.pop(); // reset to identity
 
@@ -210,8 +211,8 @@ public:
       
 
       
-      renderer.setUniform("ViewMatrix", renderer.viewMatrix());
-      renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
+      // renderer.setUniform("ViewMatrix", renderer.viewMatrix());
+      // renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
       // renderer.setUniform("HasUV", mesh.hasUV());
       // renderer.setUniform("ModelViewMatrix", renderer.);
       // renderer.setUniform("NormalMatrix", renderer.);

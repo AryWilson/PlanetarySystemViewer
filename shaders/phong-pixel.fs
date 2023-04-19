@@ -33,18 +33,18 @@ void main()
    // L is lightposition - eyeposition, normalized
    vec3 L = normalize(light.pos + -1*pEye);
    vec3 r = 2*(dot(L,nEye))*nEye-L;
-   vec3 s = normalize(vec3(light.pos + -1*pEye));
    vec3 v = normalize(-1*pEye);
 
 
    // ambient
    vec3 ia = material.ka * light.col;
    // diffuse
-   vec3 id = material.kd * max((dot(L,nEye)),0) * light.col * vec3(0.4,0.80,0.4);
+   vec3 id = material.kd * max((dot(L,nEye)),0) * light.col * vec3(0.4f,0.80f,0.4f);
    // specular
    vec3 is = material.ks * light.col *pow(max((dot(v,r)),0),material.alpha);
    vec3 col = vec3(ia+id+is);
 
-   FragColor = vec4(col, 1.0f);
+   FragColor = vec4(vec3(1,0,0), 1.0f);
+   // FragColor = vec4(col, 1.0f);
 
 }
