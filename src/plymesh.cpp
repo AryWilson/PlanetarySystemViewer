@@ -143,7 +143,7 @@ namespace agl {
       }
       for(int i = 0; i<nfaces;){
          if(!getline(file,line)){
-            cerr << "too few lines" << endl;
+            cerr << "too few lines " << i << endl;
             file.close();
             return false;
          }

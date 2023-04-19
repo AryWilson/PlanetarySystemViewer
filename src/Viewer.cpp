@@ -43,7 +43,7 @@ public:
       eyePos = vec3(7, 0, 0);
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
-      mesh = PLYMesh("../models/planet.ply");
+      mesh = PLYMesh("../models/sphere.ply");
 
       radius = 10;
       azimuth = 0;
@@ -93,9 +93,9 @@ public:
       a.vel = 1.0f;
       b.vel = 0.5;
       c.vel = 0.1f;
-      a.texture = "planet";
-      b.texture = "planet";
-      c.texture = "planet";
+      a.texture = textures[0];
+      b.texture = textures[0];
+      c.texture = textures[0];
 
       planets.push_back(a);
       planets.push_back(b);
