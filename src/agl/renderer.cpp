@@ -112,7 +112,7 @@ void Renderer::init() {
   initBillboards();
   initText();
   loadShader("cubemap", "../shaders/cubemap.vs", "../shaders/cubemap.fs");
-  loadShader("flat", "../shaders/flat.vs", "../shaders/flat.fs");
+  loadShader("unlit", "../shaders/unlit.vs", "../shaders/unlit.fs");
 
   _cube = new Cube(1.0f);
   _cone = new Cylinder(0.5f, 0.01, 1, PrimitiveSubdivision);
@@ -126,7 +126,7 @@ void Renderer::init() {
   _trs = mat4(1.0);
   _initialized = true;
 
-  beginShader("flat");  
+  beginShader("unlit");  
 }
 
 void Renderer::initLines() {

@@ -43,23 +43,26 @@ public:
       eyePos = vec3(7, 0, 0);
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
-      mesh = PLYMesh("../models/sphere.ply");
+      // mesh = PLYMesh("../models/sphere.ply");
+      // shaders = {"unlit","phong-pixel", "phong-texture"};
+      shaders = {"unlit"};
+
 
       radius = 10;
       azimuth = 0;
       elevation = 0;
       material = {0.2f,0.8f,0.5f,10.0f};
       light = {vec3(0.0f,0.0f,0.0f), vec3(1.0f,1.0f,1.0f)};
-      initPlanets();
+      // initPlanets();
    }
 
    void setup() {
+      for(string s : shaders){
+         renderer.loadShader(s, "../shaders/"+s+".vs", "../shaders/"+s+".fs");
+      }
       
-      renderer.loadShader("phong-texture","../shaders/phong-texture.vs","../shaders/phong-texture.vs");
-      renderer.loadShader("phong-pixel","../shaders/phong-pixel.vs","../shaders/phong-pixel.vs");
-      renderer.loadShader("flat","../shaders/flat.vs","../shaders/flat.vs");
       // renderer.loadCubeMap();
-      textures = GetFilenamesInDir("../textures", "png");
+      // textures = GetFilenamesInDir("../textures", "png");
 
       for(int i =0; i<textures.size(); i++){
          renderer.loadTexture(textures[i],"textures/"+textures[i],i);
@@ -141,61 +144,65 @@ public:
       update();
 
       // ---STAR---
-      renderer.beginShader("flat"); // activates shader with given name
+      renderer.beginShader("unlit"); // activates shader with given name
       float aspect = ((float)width()) / height();
       // renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
 
-      //find bounding box
-      vec3 bbMin = mesh.minBounds();
-      vec3 bbMax = mesh.maxBounds();
-      float bbCentx = (bbMin.x + bbMax.x)/2.0f;
-      float bbCenty = (bbMin.y + bbMax.y)/2.0f;
-      float bbCentz = (bbMin.z + bbMax.z)/2.0f;
-      //translate bounding box to 0,0,0
-      float bbXlen = abs(bbMax.x - bbMin.x);
-      float bbYlen = abs(bbMax.y - bbMin.y);
-      float bbZlen = abs(bbMax.z - bbMin.z);
-      float d = std::max(bbXlen,std::max(bbYlen,bbZlen));
+      // //find bounding box
+      // vec3 bbMin = mesh.minBounds();
+      // vec3 bbMax = mesh.maxBounds();
+      // float bbCentx = (bbMin.x + bbMax.x)/2.0f;
+      // float bbCenty = (bbMin.y + bbMax.y)/2.0f;
+      // float bbCentz = (bbMin.z + bbMax.z)/2.0f;
+      // //translate bounding box to 0,0,0
+      // float bbXlen = abs(bbMax.x - bbMin.x);
+      // float bbYlen = abs(bbMax.y - bbMin.y);
+      // float bbZlen = abs(bbMax.z - bbMin.z);
+      // float d = std::max(bbXlen,std::max(bbYlen,bbZlen));
 
-      renderer.push(); // push identity
-      renderer.scale(vec3(1.0f/d, 1.0f/d, 1.0f/d));
-      renderer.translate(vec3(-1*bbCentx,-1*bbCenty,-1*bbCentz));
-      renderer.push(); // push star matrix
+      // // renderer.push(); // push identity
+      // renderer.scale(vec3(1.0f/d, 1.0f/d, 1.0f/d));
+      // renderer.translate(vec3(-1*bbCentx,-1*bbCenty,-1*bbCentz));
+      // renderer.push(); // push star matrix
 
-      renderer.mesh(mesh);
-      renderer.endShader();
-
-      // ---PLANETS---
-      renderer.pop(); // get matrix for star
-      renderer.beginShader("phong-pixel");
-      if(mesh.hasUV()){
-         renderer.beginShader("phong-texture");
-      } else {
-         renderer.beginShader("phong-pixel");
-      }
-      float theta = elapsedTime()/20.0f;
-
-      for(int i = 0; i < planets.size(); i++){
-         renderer.push(); //save matrix for star
-         if(mesh.hasUV()){
-            renderer.texture("diffuseTexture", planets[i].texture); //?
-         }
-         float r = planets[i].radius;
-         float v = planets[i].vel;
-         float s = planets[i].size;
-         renderer.translate(vec3(r*cos(v*theta),0,r*sin(v*theta)));
-         renderer.scale(vec3(s, s, s));
-         renderer.mesh(mesh);
-         renderer.pop(); //reset to str matrix 
-      }
-
-      renderer.pop(); // reset to identity
-
-      renderer.endShader();
-
-      //scale, rotate, translate
+      // renderer.mesh(mesh);
       renderer.lookAt(eyePos,lookPos,upDir);
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
+      renderer.sphere();
+
+      renderer.endShader();
+
+      // // ---PLANETS---
+      // renderer.pop(); // get matrix for star
+      // renderer.beginShader("phong-pixel");
+      // if(mesh.hasUV()){
+      //    renderer.beginShader("phong-texture");
+      // } else {
+      //    renderer.beginShader("phong-pixel");
+      // }
+      // float theta = elapsedTime()/20.0f;
+
+      // for(int i = 0; i < planets.size(); i++){
+      //    renderer.push(); //save matrix for star
+      //    if(mesh.hasUV()){
+      //       renderer.texture("diffuseTexture", planets[i].texture); //?
+      //    }
+      //    float r = planets[i].radius;
+      //    float v = planets[i].vel;
+      //    float s = planets[i].size;
+      //    renderer.translate(vec3(r*cos(v*theta),0,r*sin(v*theta)));
+      //    renderer.scale(vec3(s, s, s));
+      //    renderer.mesh(mesh);
+      //    renderer.pop(); //reset to str matrix 
+      // }
+
+      // renderer.pop(); // reset to identity
+
+      // renderer.endShader();
+
+      //scale, rotate, translate
+      // renderer.lookAt(eyePos,lookPos,upDir);
+      // renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
 
 
 
@@ -218,7 +225,7 @@ public:
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
       // renderer.setUniform("ModelViewMatrix", renderer.);
       // renderer.setUniform("NormalMatrix", renderer.);
-      renderer.setUniform("eyePos", eyePos);
+      // renderer.setUniform("eyePos", eyePos);
       renderer.setUniform("material.kd", material.kd);
       renderer.setUniform("material.ks", material.ks);
       renderer.setUniform("material.ka", material.ka);
@@ -242,6 +249,8 @@ protected:
    Light light;
    vector<string> textures;
    vector<Planet> planets;
+   vector<string> shaders;
+
 };
 
 // void fnExit(){ }

@@ -93,8 +93,8 @@ set(SOURCES
 set(SHADERS
     shaders/phong-pixel.fs
     shaders/phong-pixel.vs
-    shaders/flat.fs
-    shaders/flat.vs
+    shaders/unlit.fs
+    shaders/unlit.vs
     shaders/phong-texture.fs
     shaders/phong-texture.vs
 )
