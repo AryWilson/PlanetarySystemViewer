@@ -1,4 +1,4 @@
-project(viewer)
+project(Viewer)
 cmake_minimum_required(VERSION 3.8)
 
 if (WIN32) # Include win64 platforms
@@ -93,18 +93,17 @@ set(SOURCES
 set(SHADERS
     shaders/phong-pixel.fs
     shaders/phong-pixel.vs
-    shaders/phong-vertex.fs
-    shaders/phong-vertex.vs
-    shaders/normals.fs
-    shaders/normals.vs
-    shaders/unlit.fs
-    shaders/unlit.vs)
+    shaders/flat.fs
+    shaders/flat.vs
+    shaders/phong-texture.fs
+    shaders/phong-texture.vs
+)
 
 add_executable(test-ply-mesh src/test-ply-mesh.cpp ${SOURCES} ${SHADERS})
 target_link_libraries(test-ply-mesh ${CORE})
 
-add_executable(viewer src/viewer.cpp ${SOURCES} ${SHADERS})
-target_link_libraries(viewer ${CORE})
+add_executable(Viewer src/Viewer.cpp ${SOURCES} ${SHADERS})
+target_link_libraries(Viewer ${CORE})
 
 if (WIN32)
   source_group("shaders" FILES ${SHADERS})

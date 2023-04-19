@@ -33,7 +33,7 @@ struct Planet{
    float size;
    float radius;
    float vel;
-   String texture;
+   std::string texture;
 };
 
 class Viewer : public Window {
@@ -50,7 +50,7 @@ public:
       elevation = 0;
       material = {0.2f,0.8f,0.5f,10.0f};
       light = {vec3(0.0f,0.0f,0.0f), vec3(1.0f,1.0f,1.0f)};
-      planets();
+      initPlanets();
    }
 
    void setup() {
@@ -82,10 +82,21 @@ public:
       } 
    }
 
-   void planets(){
-      Planet a = {1.0f/12, 3.0f, 1.0f, "planet"};
-      Planet b = {1.0f/5, 6.0f, 0.5f, "planet"};
-      Planet c = {1.0f/8, 10.0f, 0.1f, "planet"};
+   void initPlanets(){
+      Planet a,b,c;
+      a.size = 1.0f/12;
+      b.size = 1.0f/5;
+      c.size = 1.0f/8;
+      a.radius = 3.0f;
+      b.radius = 6.0f;
+      c.radius = 10.0f;
+      a.vel = 1.0f;
+      b.vel = 0.5;
+      c.vel = 0.1f;
+      a.texture = "planet";
+      b.texture = "planet";
+      c.texture = "planet";
+
       planets.push_back(a);
       planets.push_back(b);
       planets.push_back(c);
@@ -157,25 +168,25 @@ public:
       // ---PLANETS---
       renderer.pop(); // get matrix for star
       renderer.beginShader("phong-pixel");
-      if(mesh.hasUV){
+      if(mesh.hasUV()){
          renderer.beginShader("phong-texture");
       } else {
          renderer.beginShader("phong-pixel");
       }
       float theta = elapsedTime()/20.0f;
 
-      for(Planet planet : planets){
+      for(int i = 0; i < planets.size(); i++){
          renderer.push(); //save matrix for star
-         if(mesh.hasUV){
-            renderer.texture("diffuseTexture", planet.texture); //?
+         if(mesh.hasUV()){
+            renderer.texture("diffuseTexture", planets[i].texture); //?
          }
-         float r = planet.radius;
-         float v = planet.vel;
-         float s = planet.size;
+         float r = planets[i].radius;
+         float v = planets[i].vel;
+         float s = planets[i].size;
          renderer.translate(vec3(r*cos(v*theta),0,r*sin(v*theta)));
          renderer.scale(vec3(s, s, s));
          renderer.mesh(mesh);
-         rederer.pop() //reset to str matrix 
+         renderer.pop(); //reset to str matrix 
       }
 
       renderer.pop(); // reset to identity
@@ -229,6 +240,7 @@ protected:
    float elevation; // in [-90, 90]
    Material material;
    Light light;
+   vector<string> textures;
    vector<Planet> planets;
 };
 
