@@ -202,12 +202,6 @@ public:
 
       // renderer.pop(); // reset to identity
 
-      renderer.endShader();
-
-      // scale, rotate, translate
-      renderer.lookAt(eyePos,lookPos,upDir);
-      renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
-
       
 
       
@@ -223,6 +217,10 @@ public:
       renderer.setUniform("material.alpha", material.alpha);
       renderer.setUniform("light.pos", light.pos);
       renderer.setUniform("light.col", light.col);
+      renderer.lookAt(eyePos,lookPos,upDir);
+      renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
+      
+      renderer.endShader();
 
 
    }
