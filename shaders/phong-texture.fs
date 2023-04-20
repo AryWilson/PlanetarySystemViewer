@@ -26,13 +26,14 @@ uniform sampler2D diffuseTexture;
 in vec3 pEye;
 in vec3 nEye;
 in vec2 uv;
+in vec3 pos;
 
 out vec4 FragColor;
 
 
 void main() {
    vec3 n = normalize( nEye );
-   vec3 s = normalize( vec3(light.pos) - pEye );
+   vec3 s = normalize( vec3(pos) - pEye );
    vec3 v = normalize(vec3(-pEye));
    vec3 r = reflect( -s, n );
    // ambient
@@ -44,6 +45,7 @@ void main() {
    if(HasUV){
       vec4 texColor = texture( diffuseTexture, uv );
       FragColor = vec4((ia+id),1.0) * texColor + vec4(is,1.0);
+      // FragColor = vec4(uv.x,uv.y,0,1);
    } else {
       FragColor = vec4((ia+id),1.0) * vec4(0.6,0.5,0.5,1) + vec4(is,1.0);
    }
