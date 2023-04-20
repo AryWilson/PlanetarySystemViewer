@@ -2,7 +2,7 @@
 
 Launch an interactive, 3d model of a planetary system
 
-Representative image
+![Alt text](/images/init.gif?raw=true)
 
 ## How to build
 
