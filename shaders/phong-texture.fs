@@ -41,7 +41,7 @@ void main() {
    vec3 id = material.kd * max( dot(s, n), 0.0 ) * light.col;
    // specular
    vec3 is = material.ks * light.col * pow( max( dot(r,v), 0.0 ),material.alpha);
-   if(false){
+   if(HasUV){
       vec4 texColor = texture( diffuseTexture, uv );
       FragColor = vec4((ia+id),1.0) * texColor + vec4(is,1.0);
    } else {

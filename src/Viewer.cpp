@@ -54,7 +54,7 @@ public:
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
       mesh = PLYMesh("../models/sphere.ply");
-      shaders = {"unlit","phong-pixel", "phong-texture"};
+      shaders = {"unlit", "phong-texture"};
 
 
       radius = 10;
@@ -72,7 +72,7 @@ public:
          renderer.loadShader(s, "../shaders/"+s+".vs", "../shaders/"+s+".fs");
       }
       // renderer.loadCubeMap();
-      renderer.loadTexture("planet","textures/planet.png",0);
+      renderer.loadTexture("planet","textures/bricks.png",0);
       renderer.loadTexture("particle","textures/particle.png",1);
 
       // textures = GetFilenamesInDir("../textures", "png");
@@ -216,31 +216,31 @@ public:
       renderer.beginShader("unlit"); // activates shader with given name
       float aspect = ((float)width()) / height();
 
-      // //find bounding box
-      // vec3 bbMin = mesh.minBounds();
-      // vec3 bbMax = mesh.maxBounds();
-      // float bbCentx = (bbMin.x + bbMax.x)/2.0f;
-      // float bbCenty = (bbMin.y + bbMax.y)/2.0f;
-      // float bbCentz = (bbMin.z + bbMax.z)/2.0f;
-      // //translate bounding box to 0,0,0
-      // float bbXlen = abs(bbMax.x - bbMin.x);
-      // float bbYlen = abs(bbMax.y - bbMin.y);
-      // float bbZlen = abs(bbMax.z - bbMin.z);
-      // float d = std::max(bbXlen,std::max(bbYlen,bbZlen));
+      //find bounding box
+      vec3 bbMin = mesh.minBounds();
+      vec3 bbMax = mesh.maxBounds();
+      float bbCentx = (bbMin.x + bbMax.x)/2.0f;
+      float bbCenty = (bbMin.y + bbMax.y)/2.0f;
+      float bbCentz = (bbMin.z + bbMax.z)/2.0f;
+      //translate bounding box to 0,0,0
+      float bbXlen = abs(bbMax.x - bbMin.x);
+      float bbYlen = abs(bbMax.y - bbMin.y);
+      float bbZlen = abs(bbMax.z - bbMin.z);
+      float d = std::max(bbXlen,std::max(bbYlen,bbZlen));
 
-      // renderer.push(); // push identity
-      // renderer.scale(vec3(1.0f/d, 1.0f/d, 1.0f/d));
-      // renderer.translate(vec3(-1*bbCentx,-1*bbCenty,-1*bbCentz));
-      // renderer.push(); // push star matrix
+      renderer.push(); // push identity
+      renderer.scale(vec3(1.0f/d, 1.0f/d, 1.0f/d));
+      renderer.translate(vec3(-1*bbCentx,-1*bbCenty,-1*bbCentz));
+      renderer.push(); // push star matrix
 
-      renderer.sphere();
-      // renderer.mesh(mesh);
+      // renderer.sphere();
+      renderer.mesh(mesh);
 
 
       renderer.endShader();
 
       // ---PLANETS---
-      // renderer.pop(); // get matrix for star
+      renderer.pop(); // get matrix for star
       renderer.beginShader("phong-texture");
 
       float theta = elapsedTime();
@@ -258,11 +258,12 @@ public:
          // renderer.mesh(mesh);
          updateConfetti(delta, planets[i].trail, pos);
          drawConfetti(planets[i].trail);
-         renderer.sphere();
+         // renderer.sphere();
+         renderer.mesh(mesh);
          renderer.pop(); //reset to str matrix 
       }
 
-      // renderer.pop(); // reset to identity
+      renderer.pop(); // reset to identity
 
       
 
