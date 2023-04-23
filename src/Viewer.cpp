@@ -53,7 +53,7 @@ public:
       eyePos = vec3(7, 0, 0);
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
-      mesh = PLYMesh("../models/sphere.ply");
+      mesh = PLYMesh("../models/planet.ply");
       shaders = {"unlit", "phong-texture"};
 
       radius = 10;
@@ -70,15 +70,12 @@ public:
          renderer.loadShader(s, "../shaders/"+s+".vs", "../shaders/"+s+".fs");
       }
       // renderer.loadCubeMap();
-      renderer.loadTexture("planet","../textures/bricks.png",0);
-      renderer.loadTexture("particle","../textures/particle.png",1);
-
-      // textures = GetFilenamesInDir("../textures", "png");
+      textures = GetFilenamesInDir("../textures", "png");
       
 
-      // for(int i =0; i<textures.size(); i++){
-      //    renderer.loadTexture(textures[i],"textures/"+textures[i],i);
-      // }
+      for(int i =0; i<textures.size(); i++){
+         renderer.loadTexture(textures[i],"textures/"+textures[i],i);
+      }
       
       initPlanets();
 
@@ -100,36 +97,43 @@ public:
    }
 
    void initPlanets(){
-      Planet a,b,c;
-      a.size = 1.0f/10;
-      b.size = 1.0f/3;
-      c.size = 1.0f/5;
+      Planet a,b,c,d,e,f;
+      a.size = 1.0f/6;
+      b.size = 1.0f/9;
+      c.size = 1.0f/7;
+      d.size = 1.0f/3;
+      e.size = 1.0f/6;
+      f.size = 1.0f/9;
       a.radius = 3.0f;
       b.radius = 5.0f;
       c.radius = 7.0f;
       a.vel = 0.5f;
-      b.vel = 0.3f;
+      b.vel = 0.4f;
       c.vel = 0.2f;
-      a.texture = "planet";
-      b.texture = "planet";
-      c.texture = "planet";
+      d.vel = 0.5f;
+      e.vel = 0.3f;
+      f.vel = 0.9f;
+      a.texture = "crater";
+      b.texture = "smoke";
+      c.texture = "jupiter";
+      d.texture = "gas";
+      e.texture = "swirl1";
+      f.texture = "swirl2";
+      planets.push_back(a);
+      planets.push_back(b);
+      planets.push_back(c);
+      planets.push_back(d);
+      planets.push_back(e);
+      planets.push_back(f);
+
       Particle particle;
       particle.color = vec4(1.0f,1.0f,.8f,1.0f);
       particle.size = 0.1;
       particle.pos = vec3(0, 0, 0);
-      for (int i = 0; i < 10; i++){
-         a.trail.push_back(particle);
+      for (int i = 0; i < planets.size()*10; i++){
+         planets[i/10].trail.push_back(particle);
       }
-      for (int i = 0; i < 10; i++){
-         b.trail.push_back(particle);
-      }
-      for (int i = 0; i < 10; i++){
-         c.trail.push_back(particle);
-      }
-
-      planets.push_back(a);
-      planets.push_back(b);
-      planets.push_back(c);
+     
    }
 
    void mouseDown(int button, int mods) {
@@ -185,8 +189,7 @@ public:
   void drawTrail(vector<Particle> mParticles)
   {
     renderer.texture("image", "particle");
-    for (int i = 0; i < mParticles.size(); i++)
-    {
+    for (int i = 0; i < mParticles.size(); i++){
       Particle particle = mParticles[i];
       renderer.sprite(particle.pos, particle.color, particle.size);
     }
@@ -249,18 +252,20 @@ public:
          vec3 pos = vec3(r*cos(v*theta),0,r*sin(v*theta));
          renderer.translate(pos);
          renderer.scale(vec3(s, s, s));
+
          if(update){
             updateTrail(delta, planets[i].trail, pos);
          }
-         drawTrail(planets[i].trail);
+         
          // renderer.sphere();
          renderer.mesh(mesh);
          renderer.pop(); //reset to str matrix 
       }
 
       renderer.pop(); // reset to identity
-
-      
+      for(int i = 0; i < planets.size(); i++){
+         drawTrail(planets[i].trail);
+      }
 
       
       // renderer.setUniform("ViewMatrix", renderer.viewMatrix());
