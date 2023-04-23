@@ -385,7 +385,10 @@ public:
    {
       // update campos
       update();
+      renderer.beginShader("cubemap");
       renderer.skybox(ORBIT + 1);
+      renderer.endShader();
+
       if (single)
       {
          // ---SINGLE PLANET
