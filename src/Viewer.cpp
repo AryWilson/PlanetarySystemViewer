@@ -62,6 +62,12 @@ public:
       temp = 0;
       material = {0.1f,0.6f,0.8f,15.0f};
       light = {lookPos, vec3(1.0f,1.0f,1.0f)};
+      single_planet = 0;
+      single = false;
+      bbCentx = 0;
+      bbCenty = 0;;
+      bbCentz = 0;;
+      d = 1;
 
    }
 
@@ -78,6 +84,7 @@ public:
       }
       
       initPlanets();
+      setMeshDim(mesh);
 
    }
 
@@ -135,6 +142,20 @@ public:
       }
      
    }
+   void setMeshDim(PLYMesh mesh){
+      //find bounding box
+      vec3 bbMin = mesh.minBounds();
+      vec3 bbMax = mesh.maxBounds();
+      float bbCentx = (bbMin.x + bbMax.x)/2.0f;
+      float bbCenty = (bbMin.y + bbMax.y)/2.0f;
+      float bbCentz = (bbMin.z + bbMax.z)/2.0f;
+      //translate bounding box to 0,0,0
+      float bbXlen = abs(bbMax.x - bbMin.x);
+      float bbYlen = abs(bbMax.y - bbMin.y);
+      float bbZlen = abs(bbMax.z - bbMin.z);
+      float d = std::max(bbXlen,std::max(bbYlen,bbZlen));
+
+   }
 
    void mouseDown(int button, int mods) {
    }
@@ -150,8 +171,14 @@ public:
    }
 
    void keyUp(int key, int mods) {
+      if(key >= 49 && key <= 49+6){
+         single = true;
+         single_planet = key - 49;
+      } else if (key == 27){
+         single = false;
+      }
    }
-
+   
    void update(){
 
       float x = radius * sin(azimuth) * cos(elevation);
@@ -195,39 +222,46 @@ public:
     }
   }
 
-//load in mesh
-   void fnExit(){ mesh.clear();}
+   void drawSingle(Planet planet){
+      // ---SINGLE PLANET
+      renderer.beginShader("phong-texture"); // activates shader with given name
+      float aspect = ((float)width()) / height();
+      renderer.texture("diffuseTexture", planet.texture);
+      
+      float theta = elapsedTime();
+      float v = planet.vel;
+      float s = planet.size;
 
-   void draw() {
-      // dt();
-      // elapsedTime();
-      update();
+      renderer.rotate(v*theta, vec3(0,1,0));
+      renderer.scale(vec3(s/d, s/d, s/d));
+      renderer.translate(vec3(-1*bbCentx,-1*bbCenty,-1*bbCentz));
+      renderer.mesh(mesh);
+           
+      renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
+      renderer.setUniform("material.kd", material.kd);
+      renderer.setUniform("material.ks", material.ks);
+      renderer.setUniform("material.ka", material.ka);
+      renderer.setUniform("material.alpha", material.alpha);
+      renderer.setUniform("light.pos", eyePos);
+      renderer.setUniform("light.col", light.col);
+      renderer.lookAt(eyePos,lookPos,upDir);
+      renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
+      
+      renderer.endShader();
+      return;
+   }
 
+   void drawSpace(vector<Planet> planets){
       // ---STAR---
       renderer.beginShader("unlit"); // activates shader with given name
       float aspect = ((float)width()) / height();
-
-      //find bounding box
-      vec3 bbMin = mesh.minBounds();
-      vec3 bbMax = mesh.maxBounds();
-      float bbCentx = (bbMin.x + bbMax.x)/2.0f;
-      float bbCenty = (bbMin.y + bbMax.y)/2.0f;
-      float bbCentz = (bbMin.z + bbMax.z)/2.0f;
-      //translate bounding box to 0,0,0
-      float bbXlen = abs(bbMax.x - bbMin.x);
-      float bbYlen = abs(bbMax.y - bbMin.y);
-      float bbZlen = abs(bbMax.z - bbMin.z);
-      float d = std::max(bbXlen,std::max(bbYlen,bbZlen));
 
       renderer.push(); // push identity
       renderer.scale(vec3(1.0f/d, 1.0f/d, 1.0f/d));
       renderer.translate(vec3(-1*bbCentx,-1*bbCenty,-1*bbCentz));
       renderer.push(); // push star matrix
 
-      // renderer.sphere();
       renderer.mesh(mesh);
-
-
       renderer.endShader();
 
       // ---PLANETS---
@@ -245,7 +279,7 @@ public:
 
       for(int i = 0; i < planets.size(); i++){
          renderer.push(); //save matrix for star
-         renderer.texture("diffuseTexture", "planet"); //planets[i].texture); //?
+         renderer.texture("diffuseTexture", planets[i].texture); //?
          float r = planets[i].radius;
          float v = planets[i].vel;
          float s = planets[i].size;
@@ -268,12 +302,7 @@ public:
       }
 
       
-      // renderer.setUniform("ViewMatrix", renderer.viewMatrix());
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
-      // renderer.setUniform("HasUV", mesh.hasUV());
-      // renderer.setUniform("ModelViewMatrix", renderer.);
-      // renderer.setUniform("NormalMatrix", renderer.);
-      // renderer.setUniform("eyePos", eyePos);
       renderer.setUniform("material.kd", material.kd);
       renderer.setUniform("material.ks", material.ks);
       renderer.setUniform("material.ka", material.ka);
@@ -284,8 +313,37 @@ public:
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
       
       renderer.endShader();
+      return;
+   }
+//load in mesh
+   void fnExit(){ mesh.clear();}
 
+   void draw() {
+      //update campos
+      update();
 
+      if(single){
+         // ---SINGLE PLANET
+         drawSingle(planets[single_planet]);
+      } else {
+         // ---STAR AND PLANETS
+         drawSpace(planets);
+      }
+          
+      // renderer.setUniform("ViewMatrix", renderer.viewMatrix());
+      // renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
+      // renderer.setUniform("HasUV", mesh.hasUV());
+      // renderer.setUniform("ModelViewMatrix", renderer.);
+      // renderer.setUniform("NormalMatrix", renderer.);
+      // renderer.setUniform("eyePos", eyePos);
+      // renderer.setUniform("material.kd", material.kd);
+      // renderer.setUniform("material.ks", material.ks);
+      // renderer.setUniform("material.ka", material.ka);
+      // renderer.setUniform("material.alpha", material.alpha);
+      // renderer.setUniform("light.pos", light.pos);
+      // renderer.setUniform("light.col", light.col);
+      // renderer.lookAt(eyePos,lookPos,upDir);
+      // renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
    }
 
 protected:
@@ -302,7 +360,12 @@ protected:
    vector<Planet> planets;
    vector<string> shaders;
    float temp;
-
+   bool single;
+   int single_planet;
+   float bbCentx;
+   float bbCenty;
+   float bbCentz;
+   float d;
 };
 
 // void fnExit(){ }
