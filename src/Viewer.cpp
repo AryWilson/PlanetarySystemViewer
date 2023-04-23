@@ -11,31 +11,34 @@
 #include "plymesh.h"
 #include "osutils.h"
 
-
 using namespace std;
 using namespace glm;
 using namespace agl;
 
-struct Material{
+struct Material
+{
    float ka;
    float kd;
    float ks;
    float alpha;
 };
 
-struct Light{
+struct Light
+{
    vec3 pos;
    vec3 col;
 };
 
-struct Particle {
-  glm::vec3 pos;
-  glm::vec4 color;
-  float rot;
-  float size;
+struct Particle
+{
+   glm::vec3 pos;
+   glm::vec4 color;
+   float rot;
+   float size;
 };
 
-struct Planet{
+struct Planet
+{
    // position, velocity, redius, texture
    float size;
    float radius;
@@ -44,12 +47,16 @@ struct Planet{
    vector<Particle> trail;
 };
 
+const int PLANET_COUNT = 6;
+const int PARTICLE_COUNT = 10;
+const float ORBIT = 12;
+const float STAR_SIZE = 1.5;
 
-
-class Viewer : public Window {
+class Viewer : public Window
+{
 public:
-
-   Viewer() : Window() {
+   Viewer() : Window()
+   {
       eyePos = vec3(7, 0, 0);
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
@@ -59,61 +66,94 @@ public:
       radius = 10;
       azimuth = 0;
       elevation = 0;
-      temp = 0;
-      material = {0.1f,0.6f,0.8f,15.0f};
-      light = {lookPos, vec3(1.0f,1.0f,1.0f)};
+      update_time = 0;
+      material = {0.1f, 0.6f, 0.8f, 15.0f};
+      light = {lookPos, vec3(1.0f, 1.0f, 1.0f)};
       single_planet = 0;
       single = false;
       bbCentx = 0;
-      bbCenty = 0;;
-      bbCentz = 0;;
+      bbCenty = 0;
+      bbCentz = 0;
       d = 1;
-
    }
 
-   void setup() {
-      for(string s : shaders){
-         renderer.loadShader(s, "../shaders/"+s+".vs", "../shaders/"+s+".fs");
+   void setup()
+   {
+      for (string s : shaders)
+      {
+         renderer.loadShader(s, "../shaders/" + s + ".vs", "../shaders/" + s + ".fs");
       }
       // renderer.loadCubeMap();
       textures = GetFilenamesInDir("../textures", "png");
-      
 
-      for(int i =0; i<textures.size(); i++){
-         renderer.loadTexture(textures[i],"textures/"+textures[i],i);
+      renderer.loadCubemap("cubemap", "../textures/cubemap", 0);
+
+      for (int i = 0; i < textures.size(); i++)
+      {
+         renderer.loadTexture(textures[i], "../textures/" + textures[i], i + 1);
       }
-      
+      renderer.loadTexture("particle", "../textures/particle/particle.png", textures.size() + 1);
+
+
       initPlanets();
       setMeshDim(mesh);
-
    }
 
-   void mouseMotion(int x, int y, int dx, int dy) {
-      if (mouseIsDown(GLFW_MOUSE_BUTTON_LEFT)) {
-         azimuth -= dx*(0.02f);
-         azimuth = fmod(azimuth,2*M_PI);
+   void mouseMotion(int x, int y, int dx, int dy)
+   {
+      if (mouseIsDown(GLFW_MOUSE_BUTTON_LEFT))
+      {
+         azimuth -= dx * (0.02f);
+         azimuth = fmod(azimuth, 2 * M_PI);
 
-         elevation += dy*(0.02f);
+         elevation += dy * (0.02f);
          // elevation += M_PI_2;
          // elevation = fmod(elevation,M_PI);
          // elevation -= M_PI_2;
 
-         if(elevation>=M_PI_2){elevation = M_PI_2 - 0.01f;}
-         if(elevation<=-1*M_PI_2){elevation = -1*M_PI_2 + 0.01f;}
-      } 
+         if (elevation >= M_PI_2)
+         {
+            elevation = M_PI_2 - 0.01f;
+         }
+         if (elevation <= -1 * M_PI_2)
+         {
+            elevation = -1 * M_PI_2 + 0.01f;
+         }
+      }
    }
 
-   void initPlanets(){
-      Planet a,b,c,d,e,f;
-      a.size = 1.0f/6;
-      b.size = 1.0f/9;
-      c.size = 1.0f/7;
-      d.size = 1.0f/3;
-      e.size = 1.0f/6;
-      f.size = 1.0f/9;
+   void initPlanets()
+   {
+      // vector<float> radii;
+      // for(int i = 0; i< PLANET_COUNT; i++){
+      //    radii[i] = agl::random(STAR_SIZE+1,ORBIT);
+      // }
+      // sort(radii.begin(), radii.end());
+
+      // for(int i = 0; i< PLANET_COUNT; i++){
+      //    Planet toAdd;
+      //    toAdd.size = agl::random(0.1,0.7);
+      //    toAdd.radius = radii[0];
+      //    toAdd.vel = agl::random(0.1,0.5) * (ORBIT + 1 - radii[0]);
+      //    int t = (int) agl::random( 0, textures.size());
+      //    toAdd.texture = textures[t];
+      //    planets.push_back(toAdd);
+      // }
+      
+      Planet a, b, c, d, e, f;
+      a.size = 1.0f / 6;
+      b.size = 1.0f / 9;
+      c.size = 1.0f / 7;
+      d.size = 1.0f / 3;
+      e.size = 1.0f / 6;
+      f.size = 1.0f / 9;
       a.radius = 3.0f;
-      b.radius = 5.0f;
-      c.radius = 7.0f;
+      b.radius = 4.0f;
+      c.radius = 5.0f;
+      d.radius = 8.0f;
+      e.radius = 10.0f;
+      f.radius = 11.0f;
+
       a.vel = 0.5f;
       b.vel = 0.4f;
       c.vel = 0.2f;
@@ -134,109 +174,123 @@ public:
       planets.push_back(f);
 
       Particle particle;
-      particle.color = vec4(1.0f,1.0f,.8f,1.0f);
+      particle.color = vec4(1.0f, 1.0f, .8f, 1.0f);
       particle.size = 0.1;
       particle.pos = vec3(0, 0, 0);
-      for (int i = 0; i < planets.size()*10; i++){
-         planets[i/10].trail.push_back(particle);
+      for (int i = 0; i < PLANET_COUNT * PARTICLE_COUNT; i++)
+      {
+         planets[i / PARTICLE_COUNT].trail.push_back(particle);
       }
-     
    }
-   void setMeshDim(PLYMesh mesh){
-      //find bounding box
+   void setMeshDim(PLYMesh mesh)
+   {
+      // find bounding box
       vec3 bbMin = mesh.minBounds();
       vec3 bbMax = mesh.maxBounds();
-      float bbCentx = (bbMin.x + bbMax.x)/2.0f;
-      float bbCenty = (bbMin.y + bbMax.y)/2.0f;
-      float bbCentz = (bbMin.z + bbMax.z)/2.0f;
-      //translate bounding box to 0,0,0
+      float bbCentx = (bbMin.x + bbMax.x) / 2.0f;
+      float bbCenty = (bbMin.y + bbMax.y) / 2.0f;
+      float bbCentz = (bbMin.z + bbMax.z) / 2.0f;
+      // translate bounding box to 0,0,0
       float bbXlen = abs(bbMax.x - bbMin.x);
       float bbYlen = abs(bbMax.y - bbMin.y);
       float bbZlen = abs(bbMax.z - bbMin.z);
-      float d = std::max(bbXlen,std::max(bbYlen,bbZlen));
-
+      float d = std::max(bbXlen, std::max(bbYlen, bbZlen));
    }
 
-   void mouseDown(int button, int mods) {
+   void mouseDown(int button, int mods)
+   {
    }
 
-   void mouseUp(int button, int mods) {
+   void mouseUp(int button, int mods)
+   {
    }
 
-   void scroll(float dx, float dy) {
-      radius+=dy;
-      if(radius<=0){
+   void scroll(float dx, float dy)
+   {
+      radius += dy;
+      if (radius <= 0)
+      {
          radius = 1;
       }
    }
 
-   void keyUp(int key, int mods) {
-      if(key >= 49 && key <= 49+6){
+   void keyUp(int key, int mods)
+   {
+      if (key >= 49 && key <= 49 + 6)
+      {
          single = true;
          single_planet = key - 49;
-      } else if (key == 27){
+      }
+      else if (key == 27)
+      {
          single = false;
       }
    }
-   
-   void update(){
+
+   void update()
+   {
 
       float x = radius * sin(azimuth) * cos(elevation);
       float y = radius * sin(elevation);
       float z = radius * cos(azimuth) * cos(elevation);
-      eyePos = vec3(x,y,z);
+      eyePos = vec3(x, y, z);
    }
 
-// lookAt() changes the camera position and orientation
-// translate() applies a translation transformation
-// rotate() applies a rotation transformation
-// scale() applies a scale transformation
-// loockAt(vec3(0,0,0),lookPos,upDir);
+   // lookAt() changes the camera position and orientation
+   // translate() applies a translation transformation
+   // rotate() applies a rotation transformation
+   // scale() applies a scale transformation
+   // loockAt(vec3(0,0,0),lookPos,upDir);
 
-  void updateTrail(float dt, vector<Particle> mParticles, vec3 position)
-  {
-    bool one = agl::random() > 0.5;
+   void updateTrail(float dt, vector<Particle> mParticles, vec3 position)
+   {
+      bool one = agl::random() > 0.5;
 
-    for (int i = 0; i < mParticles.size(); i++){
-      
-      if(one && mParticles[i].color.w <=0){
-        //one new particle
-        mParticles[i].pos = position;
-        mParticles[i].color = vec4(1.0, 1.0, 0.8 , 1.0);
-        one = false;
+      for (int i = 0; i < mParticles.size(); i++)
+      {
 
-      } else{
-        // updates the opacity
-        mParticles[i].color.w -= dt;
+         if (one && mParticles[i].color.w <= 0)
+         {
+            // one new particle
+            mParticles[i].pos = position;
+            mParticles[i].color = vec4(1.0, 1.0, 0.8, 1.0);
+            one = false;
+         }
+         else
+         {
+            // updates the opacity
+            mParticles[i].color.w -= dt;
+         }
       }
-    }
-  }
+   }
 
-  // render all sprites in pool
-  void drawTrail(vector<Particle> mParticles)
-  {
-    renderer.texture("image", "particle");
-    for (int i = 0; i < mParticles.size(); i++){
-      Particle particle = mParticles[i];
-      renderer.sprite(particle.pos, particle.color, particle.size);
-    }
-  }
+   // render all sprites in pool
+   void drawTrail(vector<Particle> mParticles)
+   {
+      renderer.texture("image", "particle");
+      for (int i = 0; i < mParticles.size(); i++)
+      {
+         Particle particle = mParticles[i];
+         renderer.sprite(particle.pos, particle.color, particle.size);
+      }
+   }
 
-   void drawSingle(Planet planet){
+   void drawSingle(Planet planet)
+   {
       // ---SINGLE PLANET
       renderer.beginShader("phong-texture"); // activates shader with given name
       float aspect = ((float)width()) / height();
       renderer.texture("diffuseTexture", planet.texture);
-      
+
       float theta = elapsedTime();
       float v = planet.vel;
       float s = planet.size;
 
-      renderer.rotate(v*theta, vec3(0,1,0));
-      renderer.scale(vec3(s/d, s/d, s/d));
-      renderer.translate(vec3(-1*bbCentx,-1*bbCenty,-1*bbCentz));
+      renderer.rotate(v * theta, vec3(0, 1, 0));
+      renderer.scale(vec3(s / d, s / d, s / d));
+      renderer.translate(vec3(-1 * bbCentx, -1 * bbCenty, -1 * bbCentz));
       renderer.mesh(mesh);
-           
+
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
       renderer.setUniform("material.kd", material.kd);
       renderer.setUniform("material.ks", material.ks);
@@ -244,22 +298,27 @@ public:
       renderer.setUniform("material.alpha", material.alpha);
       renderer.setUniform("light.pos", eyePos);
       renderer.setUniform("light.col", light.col);
-      renderer.lookAt(eyePos,lookPos,upDir);
+      renderer.lookAt(eyePos, lookPos, upDir);
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
-      
+
       renderer.endShader();
       return;
    }
 
-   void drawSpace(vector<Planet> planets){
+   void drawSpace(vector<Planet> planets)
+   {
       // ---STAR---
       renderer.beginShader("unlit"); // activates shader with given name
       float aspect = ((float)width()) / height();
-
       renderer.push(); // push identity
-      renderer.scale(vec3(1.0f/d, 1.0f/d, 1.0f/d));
-      renderer.translate(vec3(-1*bbCentx,-1*bbCenty,-1*bbCentz));
-      renderer.push(); // push star matrix
+      renderer.scale(vec3(STAR_SIZE));
+      renderer.push(); // push star scale
+      
+      renderer.scale(vec3(1.0f / d, 1.0f / d, 1.0f / d));
+      renderer.translate(vec3(-1 * bbCentx, -1 * bbCenty, -1 * bbCentz));
+      renderer.push(); // push mesh matrix
+     
+      
 
       renderer.mesh(mesh);
       renderer.endShader();
@@ -270,38 +329,42 @@ public:
 
       float theta = elapsedTime();
       float delta = dt();
-      temp += dt();
+      update_time += dt();
       bool update = false;
-      if(temp>=5){
-         temp = 0;
+      if (update_time >= 5)
+      {
+         update_time = 0;
          update = true;
       }
 
-      for(int i = 0; i < planets.size(); i++){
-         renderer.push(); //save matrix for star
+      for (int i = 0; i < planets.size(); i++)
+      {
+         renderer.push();// save matrix for star
          renderer.texture("diffuseTexture", planets[i].texture); //?
          float r = planets[i].radius;
          float v = planets[i].vel;
          float s = planets[i].size;
-         vec3 pos = vec3(r*cos(v*theta),0,r*sin(v*theta));
+         vec3 pos = vec3(r * cos(v * theta), 0, r * sin(v * theta));
          renderer.translate(pos);
          renderer.scale(vec3(s, s, s));
 
-         if(update){
+         if (update)
+         {
             updateTrail(delta, planets[i].trail, pos);
          }
-         
+
          // renderer.sphere();
          renderer.mesh(mesh);
-         renderer.pop(); //reset to str matrix 
+         renderer.pop(); // reset to mesh matrix
       }
 
+      renderer.pop(); // remove star size
       renderer.pop(); // reset to identity
-      for(int i = 0; i < planets.size(); i++){
+      for (int i = 0; i < planets.size(); i++)
+      {
          drawTrail(planets[i].trail);
       }
 
-      
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
       renderer.setUniform("material.kd", material.kd);
       renderer.setUniform("material.ks", material.ks);
@@ -309,27 +372,31 @@ public:
       renderer.setUniform("material.alpha", material.alpha);
       renderer.setUniform("light.pos", light.pos);
       renderer.setUniform("light.col", light.col);
-      renderer.lookAt(eyePos,lookPos,upDir);
+      renderer.lookAt(eyePos, lookPos, upDir);
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
-      
+
       renderer.endShader();
       return;
    }
-//load in mesh
-   void fnExit(){ mesh.clear();}
+   // load in mesh
+   void fnExit() { mesh.clear(); }
 
-   void draw() {
-      //update campos
+   void draw()
+   {
+      // update campos
       update();
-
-      if(single){
+      renderer.skybox(ORBIT + 1);
+      if (single)
+      {
          // ---SINGLE PLANET
          drawSingle(planets[single_planet]);
-      } else {
+      }
+      else
+      {
          // ---STAR AND PLANETS
          drawSpace(planets);
       }
-          
+
       // renderer.setUniform("ViewMatrix", renderer.viewMatrix());
       // renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
       // renderer.setUniform("HasUV", mesh.hasUV());
@@ -352,14 +419,15 @@ protected:
    vec3 lookPos;
    vec3 upDir;
    float radius;
-   float azimuth; // in [0, 360]
+   float azimuth;   // in [0, 360]
    float elevation; // in [-90, 90]
    Material material;
    Light light;
    vector<string> textures;
    vector<Planet> planets;
    vector<string> shaders;
-   float temp;
+
+   float update_time;
    bool single;
    int single_planet;
    float bbCentx;
@@ -370,8 +438,7 @@ protected:
 
 // void fnExit(){ }
 
-
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
    // atexit (fnExit);
 
@@ -379,4 +446,3 @@ int main(int argc, char** argv)
    viewer.run();
    return 0;
 }
-
