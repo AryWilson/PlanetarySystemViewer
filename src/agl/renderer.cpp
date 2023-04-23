@@ -423,7 +423,8 @@ void Renderer::mesh(const Mesh& mesh) {
   mat3 nmv = transpose(inverse(mat3(vec3(mv[0]), vec3(mv[1]), vec3(mv[2]))));
 
   setUniform("MVP", mvp);
-  setUniform("ModelViewMatrix", mv);
+  setUniform("ModelViewMatrix", mv );
+  setUniform("ViewMatrix", _viewMatrix);
   setUniform("NormalMatrix", nmv);
   setUniform("ModelMatrix", _trs);
   setUniform("HasUV", mesh.hasUV());
@@ -589,8 +590,10 @@ void Renderer::loadCubemap(const std::string& name,
 void Renderer::loadTexture(const std::string& name,
     const std::string& fileName, int slot) {
   Image img;
+  
   img.load(fileName);
   loadTexture(name, img, slot);
+  std::cout << img.width() << std::endl;
 }
 
 void Renderer::loadTexture(const std::string& name,

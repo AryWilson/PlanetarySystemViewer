@@ -115,17 +115,7 @@ namespace agl {
             return false;
          }
          
-         if(regex_search(line, matches, re_vn)) {
-            i++;
-            // cout << matches[0] << endl;
-
-            _positions.push_back(stof(matches[1]));
-            _positions.push_back(stof(matches[2]));
-            _positions.push_back(stof(matches[3]));
-            _normals.push_back(stof(matches[4]));
-            _normals.push_back(stof(matches[5]));
-            _normals.push_back(stof(matches[6]));
-         }
+         
 
          if(regex_search(line, matches, re_txtr)) {
             i++;
@@ -139,6 +129,16 @@ namespace agl {
             _normals.push_back(stof(matches[6]));
             _uv.push_back(stof(matches[7]));
             _uv.push_back(stof(matches[8]));
+         } else if(regex_search(line, matches, re_vn)) {
+            i++;
+            // cout << matches[0] << endl;
+
+            _positions.push_back(stof(matches[1]));
+            _positions.push_back(stof(matches[2]));
+            _positions.push_back(stof(matches[3]));
+            _normals.push_back(stof(matches[4]));
+            _normals.push_back(stof(matches[5]));
+            _normals.push_back(stof(matches[6]));
          }
       }
       for(int i = 0; i<nfaces;){
