@@ -7,7 +7,7 @@ in vec2 uv;
 in vec3 lightDir;
 
 uniform sampler2D diffuseTexture; 
-uniform sampler2D normalMapTex;
+uniform sampler2D normalMapTexture;
 
 struct Material{
    float kd;
@@ -41,7 +41,7 @@ vec3 phongModel( vec3 norm, vec3 diffR ) {
 }
 void main() {
  // Lookup the normal from the normal map
- vec4 normal = texture( normalMapTex, uv );
+ vec4 normal = texture( normalMapTexture, uv );
  // The color texture is used as the diffuse reflectivity
  vec4 texColor = texture( diffuseTexture, uv );
  FragColor = vec4( phongModel(normal.xyz, texColor.rgb),

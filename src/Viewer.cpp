@@ -98,7 +98,7 @@ public:
       } 
 
       renderer.loadTexture("particle", "../textures/particle/particle.png", textures.size() + 1);
-      renderer.loadTexture("surface", "../textures/normals/surface.png", textures.size() + 2);
+      renderer.loadTexture("surfaceNormal", "../textures/normals/surfaceNormal.png", textures.size() + 2);
 
       initPlanets();
       setMeshDim(mesh);
@@ -294,6 +294,7 @@ public:
       }
       return true;
    }
+   
    void mouseDown(int button, int mods){
       if(!single){
          vec2 mousePos = mousePosition();
@@ -374,20 +375,20 @@ public:
 
    void updateTrail(float dt, int i, vec3 position) {
       bool one = agl::random() > 0.5;
-      vector<Particle> mParticles = planets[i].trail;
+      // vector<Particle> mParticles = planets[i].trail;
 
-      for (int i = 0; i < mParticles.size(); i++) {
+      for (int i = 0; i < planets[i].trail.size(); i++) {
 
-         if (one && mParticles[i].color.w <= 0) {
+         if (one && planets[i].trail[i].color.w <= 0) {
             // one new particle
-            mParticles[i].pos = position;
-            mParticles[i].color = vec4(1.0, 1.0, 0.8, 1.0);
+            planets[i].trail[i].pos = position;
+            planets[i].trail[i].color = vec4(1.0, 1.0, 0.8, 1.0);
             one = false;
          }
          else
          {
             // updates the opacity
-            mParticles[i].color.w -= dt;
+            planets[i].trail[i].color.w -= dt;
          }
       }
    }
@@ -411,11 +412,11 @@ public:
       // renderer.beginShader(planet.shader); // activates shader with given name
       // renderer.beginShader("phong-texture");
       renderer.beginShader("gas"); 
-      // renderer.beginShader("rock"); 
+      // renderer.beginShader("bumpmap");
 
       float aspect = ((float)width()) / height();
       renderer.texture("diffuseTexture", planet.texture);
-      renderer.texture("normalMapTex", "surface");
+      renderer.texture("normalMapTexture", "surfaceNormal");
 
       float theta = elapsedTime();
       float v = planet.vel;
@@ -482,7 +483,7 @@ public:
          renderer.rotate(glm::radians(90.0f), vec3(1, 0, 0));
          renderer.scale(vec3(s, s, s));
 
-         if (update) {
+         if (true){//update) {
             updateTrail(delta, i, _pos);
          }
          planets[i].position = _pos;
