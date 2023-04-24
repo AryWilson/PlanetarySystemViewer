@@ -1,48 +1,54 @@
 #version 400
 
-in vec3 ViewDir;
-in vec3 pEye;
-in vec3 nEye;
-in vec2 uv;
-in vec3 lightDir;
+struct Light {
+  vec4 pos;  // 0 => directional light; 1 => point light
+  vec3 col; 
+};
 
-uniform sampler2D diffuseTexture; 
+struct MaterialInfo {
+  vec3 kd;
+  vec3 ka;
+  vec3 ks;
+  float alpha;
+};
+
+uniform sampler2D diffuseTexture;
 uniform sampler2D normalMapTexture;
 
-struct Material{
-   float kd;
-   float ks;
-   float ka;
-   float alpha;
-};
-struct Light{
-   vec3 pos;
-   vec3 col;
-};
+uniform Light light; 
 uniform Material material;
-uniform Light light;
+uniform mat4 ModelViewMatrix;
+uniform mat3 NormalMatrix;
+uniform mat4 MVP;
 
-layout( location = 0 ) out vec4 FragColor;
+in vec4 position;
+in vec4 lightpos;
+in vec3 normal;
+in vec2 uv;
 
-vec4 phongModel( vec3 norm, vec3 diffR, vec4 texColor) {
-    vec3 r = reflect( -lightDir, norm );
-    float sDotN = max( dot(lightDir, norm), 0.0 );
+out vec4 FragColor;
 
-    vec3 ambient = material.ka * light.col;
-    vec3 diffuse = material.kd * light.col * sDotN;
-    vec3 spec = vec3(0.0);
+vec3 phongModel(in vec3 ePos, in vec3 eNormal) {
+  vec3 L = normalize(lightpos.xyz - lightpos.w * ePos);
+  vec3 v = normalize(-ePos);
+  vec3 r = normalize(reflect(v, eNormal));
 
-    if( sDotN > 0.0 ) {
-        spec = light.col * material.ks * pow( max( dot(r,ViewDir), 0.0 ),
-    material.alpha);
-    } 
+  vec3 ambient = light.col * material.ka;
 
-    return vec4((ambient + diffuse),1.0) * texColor + vec4(spec, 1.0);
+  float angle = max( dot(L,eNormal), 0.0 ); 
+  vec3 diffuse = angle * light.col * material.kd;
+
+  vec3 mainColor = texture(diffuseTexture, uv).rgb;
+  vec3 color = mainColor*(ambient + diffuse);
+
+  float base = max(dot(r, -v), 0.0);
+  vec3 spec = light.col * material.ks * pow(base, material.alpha);
+
+  return color;
 }
+
 void main() {
- // Lookup the normal from the normal map
- vec4 normal = texture( normalMapTexture, uv );
- // The color texture is used as the diffuse reflectivity
- vec4 texColor = texture( diffuseTexture, uv );
- FragColor = phongModel(normal.xyz, texColor.rgb, texColor);
+  vec3 texNormal = normalize(2*(texture(normalMapTexture, uv).xyz-0.5f));
+  vec3 color = phongModel(position.xyz, texNormal);
+  FragColor = vec4(color, 1.0);
 }
