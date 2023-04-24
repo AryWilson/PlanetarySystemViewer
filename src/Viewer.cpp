@@ -359,8 +359,9 @@ public:
       eyePos = vec3(x, y, z);
    }
 
-   void updateTrail(float dt, vector<Particle> mParticles, vec3 position) {
+   void updateTrail(float dt, int i, vec3 position) {
       bool one = agl::random() > 0.5;
+      vector<Particle> mParticles = planets[i].trail;
 
       for (int i = 0; i < mParticles.size(); i++) {
 
@@ -464,7 +465,7 @@ public:
          renderer.scale(vec3(s, s, s));
 
          if (update) {
-            updateTrail(delta, planets[i].trail, _pos);
+            updateTrail(delta, i, _pos);
          }
          planets[i].position = _pos;
          // planets[i].pos = vec3(renderer.getModelMatrix() * vec4(pos,1));
