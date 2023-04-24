@@ -388,6 +388,7 @@ public:
       float s = planet.size;
 
       renderer.rotate(v * theta, vec3(0, 1, 0));
+      renderer.rotate(glm::radians(90.0f), vec3(1, 0, 0));
       // renderer.scale(vec3(s / d, s / d, s / d));
       renderer.scale(vec3(1.0f / d, 1.0f / d, 1.0f / d));
       renderer.translate(vec3(-1 * bbCentx, -1 * bbCenty, -1 * bbCentz));
@@ -444,6 +445,7 @@ public:
          vec3 pos = vec3(r * cos(v * theta), 0, r * sin(v * theta));
          planets[i].pos = pos;
          renderer.translate(pos);
+         renderer.rotate(glm::radians(90.0f), vec3(1, 0, 0));
          renderer.scale(vec3(s, s, s));
 
          if (update) {
