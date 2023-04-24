@@ -28,8 +28,8 @@ struct Material
 
 struct Light
 {
-   vec3 pos;
-   vec3 col;
+   glm::vec3 pos;
+   glm::vec3 col;
 };
 
 struct Particle
@@ -46,7 +46,7 @@ struct Planet
    float size;
    float radius;
    float vel;
-   vec3 pos;
+   glm::vec3 position;
    string texture;
    vector<Particle> trail;
 };
@@ -61,6 +61,10 @@ class Viewer : public Window
 {
 public:
    Viewer() : Window() {
+
+   }
+
+   void setup() {
       eyePos = vec3(7, 0, 0);
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
@@ -79,9 +83,7 @@ public:
       bbCenty = 0;
       bbCentz = 0;
       d = 1;
-   }
 
-   void setup() {
       srand(time(NULL));
       for (string s : shaders) {
          renderer.loadShader(s, "../shaders/" + s + ".vs", "../shaders/" + s + ".fs");
@@ -98,7 +100,7 @@ public:
 
       initPlanets();
       setMeshDim(mesh);
-      renderer.blendMode(agl::ADD);
+      // renderer.blendMode(agl::ADD);
    }
 
    void mouseMotion(int x, int y, int dx, int dy) {
@@ -160,13 +162,19 @@ public:
          d.radius = 8.0f;
          e.radius = 10.0f;
          f.radius = 11.0f;
+         a.position = vec3(0);
+         b.position = vec3(0);
+         c.position = vec3(0);
+         d.position = vec3(0);
+         e.position = vec3(0);
+         f.position = vec3(0);
 
-         a.vel = 0.8f;
-         b.vel = 0.7f;
-         c.vel = 0.5f;
-         d.vel = 0.3f;
-         e.vel = 0.3f;
-         f.vel = 0.4f;
+         a.vel = 0.6f;
+         b.vel = 0.5f;
+         c.vel = 0.3f;
+         d.vel = 0.2f;
+         e.vel = 0.1f;
+         f.vel = 0.2f;
          a.texture = "craters.png";
          b.texture = "smoke.png";
          c.texture = "jupiter.png";
@@ -227,104 +235,105 @@ public:
       return vec3(worldPos.x, worldPos.y, worldPos.z);
    }
 
-   bool sphereIntercetionBool(vec3 p0, vec3 v, vec3 c, float r){
+   float sphereIntercetion(vec3 p0, vec3 v, vec3 c, float r){
+      // cout << "center" << c << endl;
+
       vec3 l = c - p0;
       float s = dot(l,normalize(v));
-      if (s < 0){ // sphere is behind us
+      float l2 = dot(l,l);
+      if (s < 0 && l2 > pow(r,2)){ // sphere is behind us
+         return -1;
+      }
+      float m2 = pow(length(l),2) - pow(s,2);
+      if(m2 > pow(r,2)){
+         return -1;
+      }
+      float q = sqrt(pow(r,2) - m2);
+      float t = -1;
+      if(l2 > pow(r,2)){
+         t = s - q;
+      } else {
+         t = s + q;
+      }
+      return t;
+      // return p0 + t*v; //intersection point
+   }
+
+   bool sphereIntercetionBool(vec3 p0, vec3 v, vec3 c, float r){
+      // cout << "center" << c << endl;
+      r = r+1;
+      vec3 l = c - p0;
+      float s = dot(l,normalize(v));
+      float l2 = dot(l,l);
+      if (s < 0 && l2 > pow(r,2)){ // sphere is behind us
          return false;
       }
       float m2 = pow(length(l),2) - pow(s,2);
       if(m2 > pow(r,2)){
          return false;
+      }
+      float q = sqrt(pow(r,2) - m2);
+      float t = -1;
+      if(l2 > pow(r,2)){
+         t = s - q;
+      } else {
+         t = s + q;
       }
       return true;
-      /*
-      float q = sqrt(pow(r,2) - m2);
-      
-      float t = s - q;
-      vec3 far_a = v*(s + q);
-      
-      if(pow(length(l),2) > pow(r,2)){
-         return false;
-      } else {
-         return true;
-      }
-      return false;
-      */
    }
-
-   float sphereIntercetion(vec3 p0, vec3 v, vec3 c, float r){
-      vec3 l = c - p0;
-      float s = dot(l,normalize(v));
-      if (s < 0){ // sphere is behind us
-         return -1;
-      }
-      float m2 = pow(length(l),2) - pow(s,2);
-      if(m2 > pow(r,2)){
-         return -1;
-      }
-      return s;
-
-
-      // float q = sqrt(pow(r,2) - m2);
-      
-      // float t = s - q;
-      // vec3 far_a = v*(s + q);
-      
-      // if(pow(length(l),2) > pow(r,2)){
-      //    return -1;
-      // } else {
-      //    return s;
-      // }
-      // return -1;
-   }
-
    void mouseDown(int button, int mods){
       if(!single){
          vec2 mousePos = mousePosition();
          vec3 worldPos = screenToWorld(mousePos);
+         // cout << "mosuePos" << mousePos << endl;
          vec3 rayDir = normalize(worldPos - eyePos);
-         // sort planets by depth?
+         // cout << "rayPos" << rayDir << endl;
+
          for (int i = 0; i< planets.size(); i++){
-            if(sphereIntercetionBool(eyePos, rayDir, planets[i].pos, planets[i].size)){
+            if(sphereIntercetionBool(eyePos, rayDir, planets[i].position, planets[i].size)){
                single = true;
                single_planet = i;
-               break;
             }
          }
+         
       }
    }
 
-   void _mouseDown(int button, int mods){
-      if(!single){
-         vec2 mousePos = mousePosition();
-         vec3 worldPos = screenToWorld(mousePos);
-         vec3 rayDir = normalize(worldPos - eyePos);
-         float dists[PLANET_COUNT];
-         memset(dists, -1, sizeof(dists));
-         float min = ORBIT*4;
 
-         for (int i = 0; i< planets.size(); i++){
-            float dist = sphereIntercetion(eyePos, rayDir, planets[i].pos, planets[i].size);
-            if(dist >= 0){
-               single = true;
-               // single_planet = i;
-               if (dist < min){
-                  min = dist;
+   // void mouseDown(int button, int mods){
+   //    if(!single){
+   //       vec2 mousePos = mousePosition();
+   //       vec3 worldPos = screenToWorld(mousePos);
+   //       // cout << "mosuePos" << mousePos << endl;
+   //       vec3 rayDir = normalize(worldPos - eyePos);
+   //       // cout << "rayPos" << rayDir << endl;
 
-               }
-            }
-         }
-         if(single){
-            for(int i = 0; i< PLANET_COUNT; i++){
-               if(dists[i] >= 0 && dists[i] <= min + 0.0001){
-                  single_planet = i;
-                  break;
-               }
-            }
-         }
-      }
-   }
+   //       float dists[PLANET_COUNT];
+   //       memset(dists, -1, sizeof(dists));
+   //       float min = ORBIT*4;
+
+   //       for (int i = 0; i< planets.size(); i++){
+   //          cout << planets[i].position << endl;
+   //          float dist = sphereIntercetion(eyePos, rayDir, planets[i].position, planets[i].size);
+   //          if(dist >= 0){
+   //             single = true;
+   //             // single_planet = i;
+   //             if (dist < min){
+   //                min = dist;
+
+   //             }
+   //          }
+   //       }
+   //       if(single){
+   //          for(int i = 0; i< PLANET_COUNT; i++){
+   //             if(dists[i] >= 0 && dists[i] <= min + 0.0001){
+   //                single_planet = i;
+   //                break;
+   //             }
+   //          }
+   //       }
+   //    }
+   // }
 
    void scroll(float dx, float dy) {
       radius += dy;
@@ -414,7 +423,7 @@ public:
       return;
    }
 
-   void drawSpace(vector<Planet> planets) {
+   void drawSpace() {
       // ---STAR---
       renderer.beginShader("unlit"); // activates shader with given name
       float aspect = ((float)width()) / height();
@@ -448,16 +457,18 @@ public:
          float r = planets[i].radius;
          float v = planets[i].vel;
          float s = planets[i].size;
-         vec3 pos = vec3(r * cos(v * theta), 0, r * sin(v * theta));
-         planets[i].pos = pos;
-         renderer.translate(pos);
+         glm::vec3 _pos = vec3(r * cos(v * theta), 0, r * sin(v * theta));
+         
+         renderer.translate(_pos);
          renderer.rotate(glm::radians(90.0f), vec3(1, 0, 0));
          renderer.scale(vec3(s, s, s));
 
          if (update) {
-            updateTrail(delta, planets[i].trail, pos);
+            updateTrail(delta, planets[i].trail, _pos);
          }
-
+         planets[i].position = _pos;
+         // planets[i].pos = vec3(renderer.getModelMatrix() * vec4(pos,1));
+         // cout << planets[i].position << endl;
          // renderer.sphere();
          renderer.mesh(mesh);
          renderer.pop(); // reset to mesh matrix
@@ -494,7 +505,7 @@ public:
       renderer.beginShader("cubemap");
       // renderer.texture("cubemap", "space");
       renderer.cubemap("cubemap","space");
-      renderer.skybox(ORBIT + 5);
+      renderer.skybox(ORBIT + 10);
       // renderer.skybox(10);
       renderer.endShader();
 
@@ -504,7 +515,7 @@ public:
       }
       else{
          // ---STAR AND PLANETS
-         drawSpace(planets);
+         drawSpace();
       }
 
       // renderer.setUniform("ViewMatrix", renderer.viewMatrix());
@@ -533,9 +544,9 @@ protected:
    float elevation; // in [-90, 90]
    Material material;
    Light light;
-   vector<string> textures;
-   vector<Planet> planets;
-   vector<string> shaders;
+   std::vector<string> textures;
+   std::vector<Planet> planets;
+   std::vector<string> shaders;
 
    float update_time;
    bool single;
@@ -544,7 +555,10 @@ protected:
    float bbCenty;
    float bbCentz;
    float d;
+
 };
+
+
 
 // void fnExit(){ }
 

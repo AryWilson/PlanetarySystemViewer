@@ -432,6 +432,10 @@ void Renderer::mesh(const Mesh& mesh) {
   mesh.render();
 }
 
+glm::mat4 Renderer::getModelMatrix(){
+  return _trs;
+}
+
 void Renderer::cleanupShaders() {
   while (_shaderStack.size() > 1) {
     endShader();
@@ -541,7 +545,7 @@ void Renderer::loadCubemap(const std::string& name,
   for (string filename : faces) {
       Image img;
       img.load(filename);
-      std::cout << img.width() << std::endl;
+      // std::cout << img.width() << std::endl;
       images.push_back(img);
   }
   loadCubemap(name, images, slot);

@@ -614,6 +614,8 @@ class Renderer {
   void mesh(const Mesh& m);
   ///@}
 
+  glm::mat4 getModelMatrix();
+
  private:
   void initBillboards();
   void initLines();
