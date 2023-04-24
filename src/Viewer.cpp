@@ -10,6 +10,9 @@
 #include "agl/window.h"
 #include "plymesh.h"
 #include "osutils.h"
+#include <cstring>
+#include <bits/stdc++.h>
+#include <time.h>
 
 using namespace std;
 using namespace glm;
@@ -50,7 +53,7 @@ struct Planet
 
 const int PLANET_COUNT = 6;
 const int PARTICLE_COUNT = 10;
-const float ORBIT = 12;
+const float ORBIT = 10;
 const float STAR_SIZE = 1.5;
 
 class Viewer : public Window
@@ -61,14 +64,14 @@ public:
       eyePos = vec3(7, 0, 0);
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
-      mesh = PLYMesh("../models/planet.ply");
+      mesh = PLYMesh("../models/sphere.ply");
       shaders = {"unlit", "phong-texture"};
 
       radius = 10;
       azimuth = 0;
       elevation = 0;
       update_time = 0;
-      material = {0.1f, 0.6f, 0.8f, 15.0f};
+      material = {0.3f, 0.6f, 0.8f, 15.0f};
       light = {lookPos, vec3(1.0f, 1.0f, 1.0f)};
       single_planet = 0;
       single = false;
@@ -80,6 +83,7 @@ public:
 
    void setup()
    {
+      srand(time(NULL));
       for (string s : shaders)
       {
          renderer.loadShader(s, "../shaders/" + s + ".vs", "../shaders/" + s + ".fs");
@@ -89,11 +93,10 @@ public:
 
       renderer.loadCubemap("cubemap", "../textures/cubemap", 0);
 
-      for (int i = 0; i < textures.size(); i++)
-      {
+      for (int i = 0; i < textures.size(); i++){
          renderer.loadTexture(textures[i], "../textures/" + textures[i], i + 1);
       }
-      renderer.loadTexture("particle", "../textures/particle/particle.png", textures.size() + 1);
+      // renderer.loadTexture("particle", "../textures/particle/particle.png", textures.size() + 1);
 
 
       initPlanets();
@@ -123,56 +126,66 @@ public:
       }
    }
 
-   void initPlanets()
-   {
-      // vector<float> radii;
-      // for(int i = 0; i< PLANET_COUNT; i++){
-      //    radii[i] = agl::random(STAR_SIZE+1,ORBIT);
-      // }
-      // sort(radii.begin(), radii.end());
+   void initPlanets() {
 
-      // for(int i = 0; i< PLANET_COUNT; i++){
-      //    Planet toAdd;
-      //    toAdd.size = agl::random(0.1,0.7);
-      //    toAdd.radius = radii[0];
-      //    toAdd.vel = agl::random(0.1,0.5) * (ORBIT + 1 - radii[0]);
-      //    int t = (int) agl::random( 0, textures.size());
-      //    toAdd.texture = textures[t];
-      //    planets.push_back(toAdd);
-      // }
-      
-      Planet a, b, c, d, e, f;
-      a.size = 1.0f / 6;
-      b.size = 1.0f / 9;
-      c.size = 1.0f / 7;
-      d.size = 1.0f / 3;
-      e.size = 1.0f / 6;
-      f.size = 1.0f / 9;
-      a.radius = 3.0f;
-      b.radius = 4.0f;
-      c.radius = 5.0f;
-      d.radius = 8.0f;
-      e.radius = 10.0f;
-      f.radius = 11.0f;
+      if(false) {
+         float rnd = fmod( (rand()/((float)rand())) , 1.0);
+         vector<float> radii;
+         for(int i = 0; i< PLANET_COUNT; i++){
+            radii.push_back((rnd * (ORBIT - (STAR_SIZE+1))) + STAR_SIZE+1);
+            rnd = fmod( (rand()/((float)rand())) , 1.0);
+         }
+         std::sort(radii.begin(), radii.end());
+         for(int i = 0; i< PLANET_COUNT; i++){
+            Planet toAdd;
+            rnd = fmod( (rand()/((float)rand())) , 1.0);
+            toAdd.size = rnd * (0.7 - 0.1) + 0.1;
 
-      a.vel = 0.5f;
-      b.vel = 0.4f;
-      c.vel = 0.2f;
-      d.vel = 0.5f;
-      e.vel = 0.3f;
-      f.vel = 0.9f;
-      a.texture = "crater";
-      b.texture = "smoke";
-      c.texture = "jupiter";
-      d.texture = "gas";
-      e.texture = "swirl1";
-      f.texture = "swirl2";
-      planets.push_back(a);
-      planets.push_back(b);
-      planets.push_back(c);
-      planets.push_back(d);
-      planets.push_back(e);
-      planets.push_back(f);
+            toAdd.radius = radii[i];
+
+            rnd = fmod( (rand()/((float)rand())) , 1.0);
+            toAdd.vel = (rnd * (0.2 - 0.05) + 0.05) * (ORBIT + 0.5 - radii[i]);
+
+            int t = rand()%textures.size();
+            toAdd.texture = textures[t];
+
+            cout << toAdd.radius << endl;
+            planets.push_back(toAdd);
+         }
+      } else {
+         Planet a, b, c, d, e, f;
+         a.size = 1.0f / 5;
+         b.size = 1.0f / 8;
+         c.size = 1.0f / 6;
+         d.size = 1.0f / 3;
+         e.size = 1.0f / 5;
+         f.size = 1.0f / 8;
+         a.radius = 3.0f;
+         b.radius = 4.0f;
+         c.radius = 5.0f;
+         d.radius = 8.0f;
+         e.radius = 10.0f;
+         f.radius = 11.0f;
+
+         a.vel = 0.8f;
+         b.vel = 0.7f;
+         c.vel = 0.5f;
+         d.vel = 0.3f;
+         e.vel = 0.3f;
+         f.vel = 0.4f;
+         a.texture = "craters.png";
+         b.texture = "smoke.png";
+         c.texture = "jupiter.png";
+         d.texture = "gas.png";
+         e.texture = "swirl1.png";
+         f.texture = "swirl2.png";
+         planets.push_back(a);
+         planets.push_back(b);
+         planets.push_back(c);
+         planets.push_back(d);
+         planets.push_back(e);
+         planets.push_back(f);
+      }
 
       Particle particle;
       particle.color = vec4(1.0f, 1.0f, .8f, 1.0f);
@@ -189,14 +202,14 @@ public:
       // find bounding box
       vec3 bbMin = mesh.minBounds();
       vec3 bbMax = mesh.maxBounds();
-      float bbCentx = (bbMin.x + bbMax.x) / 2.0f;
-      float bbCenty = (bbMin.y + bbMax.y) / 2.0f;
-      float bbCentz = (bbMin.z + bbMax.z) / 2.0f;
+      bbCentx = (bbMin.x + bbMax.x) / 2.0f;
+      bbCenty = (bbMin.y + bbMax.y) / 2.0f;
+      bbCentz = (bbMin.z + bbMax.z) / 2.0f;
       // translate bounding box to 0,0,0
       float bbXlen = abs(bbMax.x - bbMin.x);
       float bbYlen = abs(bbMax.y - bbMin.y);
       float bbZlen = abs(bbMax.z - bbMin.z);
-      float d = std::max(bbXlen, std::max(bbYlen, bbZlen));
+      d = std::max(bbXlen, std::max(bbYlen, bbZlen));
    }
 
 vec3 screenToWorld(const vec2& screen){
@@ -232,18 +245,19 @@ vec3 screenToWorld(const vec2& screen){
       if(m2 > pow(r,2)){
          return false;
       }
+      return true;
 
-      float q = sqrt(pow(r,2) - m2);
+      // float q = sqrt(pow(r,2) - m2);
       
-      float t = s - q;
-      vec3 far_a = v*(s + q);
+      // float t = s - q;
+      // vec3 far_a = v*(s + q);
       
-      if(pow(length(l),2) > pow(r,2)){
-         return false;
-      } else {
-         return true;
-      }
-      return false;
+      // if(pow(length(l),2) > pow(r,2)){
+      //    return false;
+      // } else {
+      //    return true;
+      // }
+      // return false;
    }
 
    float sphereIntercetion(vec3 p0, vec3 v, vec3 c, float r){
@@ -256,18 +270,20 @@ vec3 screenToWorld(const vec2& screen){
       if(m2 > pow(r,2)){
          return -1;
       }
+      return s;
 
-      float q = sqrt(pow(r,2) - m2);
+
+      // float q = sqrt(pow(r,2) - m2);
       
-      float t = s - q;
-      vec3 far_a = v*(s + q);
+      // float t = s - q;
+      // vec3 far_a = v*(s + q);
       
-      if(pow(length(l),2) > pow(r,2)){
-         return -1;
-      } else {
-         return s;
-      }
-      return -1;
+      // if(pow(length(l),2) > pow(r,2)){
+      //    return -1;
+      // } else {
+      //    return s;
+      // }
+      // return -1;
    }
 
    void mouseDown(int button, int mods){
@@ -334,7 +350,7 @@ vec3 screenToWorld(const vec2& screen){
          single = true;
          single_planet = key - 49;
       }
-      else if (key == 27)
+      else if (key == 32)
       {
          single = false;
       }
@@ -476,7 +492,7 @@ vec3 screenToWorld(const vec2& screen){
       renderer.pop(); // reset to identity
       for (int i = 0; i < planets.size(); i++)
       {
-         drawTrail(planets[i].trail);
+         // drawTrail(planets[i].trail);
       }
 
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
@@ -487,7 +503,7 @@ vec3 screenToWorld(const vec2& screen){
       renderer.setUniform("light.pos", light.pos);
       renderer.setUniform("light.col", light.col);
       renderer.lookAt(eyePos, lookPos, upDir);
-      renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
+      renderer.perspective(glm::radians(70.0f), aspect, 0.1f, 50.0f);
 
       renderer.endShader();
       return;
@@ -495,12 +511,11 @@ vec3 screenToWorld(const vec2& screen){
    // load in mesh
    void fnExit() { mesh.clear(); }
 
-   void draw()
-   {
+   void draw() {
       // update campos
       update();
       renderer.beginShader("cubemap");
-      renderer.skybox(ORBIT + 1);
+      renderer.skybox(ORBIT + 5);
       renderer.endShader();
 
       if (single)
