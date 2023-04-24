@@ -43,6 +43,7 @@ struct Planet
    float size;
    float radius;
    float vel;
+   vec3 pos;
    string texture;
    vector<Particle> trail;
 };
@@ -182,6 +183,7 @@ public:
          planets[i / PARTICLE_COUNT].trail.push_back(particle);
       }
    }
+   
    void setMeshDim(PLYMesh mesh)
    {
       // find bounding box
@@ -197,13 +199,124 @@ public:
       float d = std::max(bbXlen, std::max(bbYlen, bbZlen));
    }
 
-   void mouseDown(int button, int mods)
-   {
+vec3 screenToWorld(const vec2& screen){
+    vec4 screenPos = vec4(screen,1,1);
+
+    //flip y coord 
+    screenPos.y = height() - screenPos.y;
+
+    // convert to canonical view coords
+    screenPos.x = 2.0f*((screenPos.x / width()) - 0.5);
+    screenPos.y = 2.0f*((screenPos.y / height()) - 0.5);
+
+    //convert the particle position to screen coords
+    mat4 projection = renderer.projectionMatrix();
+    mat4 view = renderer.viewMatrix();
+    
+    vec4 worldPos = inverse(projection * view) * screenPos; 
+
+    // convert from homogeneous to ordinary coord
+    worldPos.x /= worldPos.w;
+    worldPos.y /= worldPos.w;
+    worldPos.z /= worldPos.w;
+    return vec3(worldPos.x, worldPos.y, worldPos.z);
+}
+
+   bool sphereIntercetionBool(vec3 p0, vec3 v, vec3 c, float r){
+      vec3 l = c - p0;
+      float s = dot(l,normalize(v));
+      if (s < 0){ // sphere is behind us
+         return false;
+      }
+      float m2 = pow(length(l),2) - pow(s,2);
+      if(m2 > pow(r,2)){
+         return false;
+      }
+
+      float q = sqrt(pow(r,2) - m2);
+      
+      float t = s - q;
+      vec3 far_a = v*(s + q);
+      
+      if(pow(length(l),2) > pow(r,2)){
+         return false;
+      } else {
+         return true;
+      }
+      return false;
    }
 
-   void mouseUp(int button, int mods)
-   {
+   float sphereIntercetion(vec3 p0, vec3 v, vec3 c, float r){
+      vec3 l = c - p0;
+      float s = dot(l,normalize(v));
+      if (s < 0){ // sphere is behind us
+         return -1;
+      }
+      float m2 = pow(length(l),2) - pow(s,2);
+      if(m2 > pow(r,2)){
+         return -1;
+      }
+
+      float q = sqrt(pow(r,2) - m2);
+      
+      float t = s - q;
+      vec3 far_a = v*(s + q);
+      
+      if(pow(length(l),2) > pow(r,2)){
+         return -1;
+      } else {
+         return s;
+      }
+      return -1;
    }
+
+   void mouseDown(int button, int mods){
+      if(!single){
+         vec2 mousePos = mousePosition();
+         vec3 worldPos = screenToWorld(mousePos);
+         vec3 rayDir = normalize(worldPos - eyePos);
+         // sort planets by depth?
+         for (int i = 0; i< planets.size(); i++){
+            if(sphereIntercetionBool(eyePos, rayDir, planets[i].pos, planets[i].size)){
+               single = true;
+               single_planet = i;
+               break;
+            }
+         }
+      }
+   }
+
+   void _mouseDown(int button, int mods){
+      if(!single){
+         vec2 mousePos = mousePosition();
+         vec3 worldPos = screenToWorld(mousePos);
+         vec3 rayDir = normalize(worldPos - eyePos);
+         float dists[PLANET_COUNT];
+         memset(dists, -1, sizeof(dists));
+         float min = ORBIT*4;
+
+         for (int i = 0; i< planets.size(); i++){
+            float dist = sphereIntercetion(eyePos, rayDir, planets[i].pos, planets[i].size);
+            if(dist >= 0){
+               single = true;
+               // single_planet = i;
+               if (dist < min){
+                  min = dist;
+
+               }
+            }
+         }
+         if(single){
+            for(int i = 0; i< PLANET_COUNT; i++){
+               if(dists[i] >= 0 && dists[i] <= min + 0.0001){
+                  single_planet = i;
+                  break;
+               }
+            }
+         }
+      }
+   }
+
 
    void scroll(float dx, float dy)
    {
@@ -345,6 +458,7 @@ public:
          float v = planets[i].vel;
          float s = planets[i].size;
          vec3 pos = vec3(r * cos(v * theta), 0, r * sin(v * theta));
+         planets[i].pos = pos;
          renderer.translate(pos);
          renderer.scale(vec3(s, s, s));
 
