@@ -48,6 +48,7 @@ struct Planet
    float vel;
    glm::vec3 position;
    string texture;
+   string shader;
    vector<Particle> trail;
 };
 
@@ -97,6 +98,7 @@ public:
       } 
 
       renderer.loadTexture("particle", "../textures/particle/particle.png", textures.size() + 1);
+      renderer.loadTexture("surface", "../textures/normals/surface.png", textures.size() + 2);
 
       initPlanets();
       setMeshDim(mesh);
@@ -136,6 +138,11 @@ public:
             Planet toAdd;
             rnd = fmod( (rand()/((float)rand())) , 1.0);
             toAdd.size = rnd * (0.7 - 0.1) + 0.1;
+            if (toAdd.size > 0.4){
+               toAdd.shader = "gas";
+            } else {
+               toAdd.shader = "rock";
+            }
 
             toAdd.radius = radii[i];
 
@@ -181,6 +188,12 @@ public:
          d.texture = "gas.png";
          e.texture = "swirl1.png";
          f.texture = "swirl2.png";
+         a.shader = "rock";
+         b.shader = "rock";
+         c.shader = "gas";
+         d.shader = "gas";
+         e.shader = "gas";
+         f.shader = "gas";
          planets.push_back(a);
          planets.push_back(b);
          planets.push_back(c);
@@ -261,7 +274,7 @@ public:
 
    bool sphereIntercetionBool(vec3 p0, vec3 v, vec3 c, float r){
       // cout << "center" << c << endl;
-      r = r+1;
+      r = r+0.5;
       vec3 l = c - p0;
       float s = dot(l,normalize(v));
       float l2 = dot(l,l);
@@ -395,9 +408,14 @@ public:
 
    void drawSingle(Planet planet) {
       // ---SINGLE PLANET
-      renderer.beginShader("phong-texture"); // activates shader with given name
+      // renderer.beginShader(planet.shader); // activates shader with given name
+      // renderer.beginShader("phong-texture");
+      renderer.beginShader("gas"); 
+      // renderer.beginShader("rock"); 
+
       float aspect = ((float)width()) / height();
       renderer.texture("diffuseTexture", planet.texture);
+      renderer.texture("normalMapTex", "surface");
 
       float theta = elapsedTime();
       float v = planet.vel;
@@ -445,9 +463,9 @@ public:
 
       float theta = elapsedTime();
       float delta = dt();
-      update_time += dt();
+      update_time += delta;
       bool update = false;
-      if (update_time >= 5) {
+      if (update_time >= 1) {
          update_time = 0;
          update = true;
       }
