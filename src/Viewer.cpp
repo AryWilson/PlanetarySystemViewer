@@ -370,11 +370,16 @@ public:
 
    // render all sprites in pool
    void drawTrail(vector<Particle> mParticles) {
+      renderer.beginShader("sprite");
       renderer.texture("image", "particle");
+      // renderer.rotate(eyePos.x,vec3(1,0,0));
+      // renderer.rotate(eyePos.y,vec3(0,1,0));
+      // renderer.rotate(eyePos.z,vec3(0,0,1));
       for (int i = 0; i < mParticles.size(); i++) {
          Particle particle = mParticles[i];
          renderer.sprite(particle.pos, particle.color, particle.size);
       }
+      renderer.endShader();
    }
 
    void drawSingle(Planet planet) {
@@ -459,9 +464,7 @@ public:
 
       renderer.pop(); // remove star size
       renderer.pop(); // reset to identity
-      for (int i = 0; i < planets.size(); i++) {
-         drawTrail(planets[i].trail);
-      }
+      
 
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
       renderer.setUniform("material.kd", material.kd);
@@ -474,6 +477,10 @@ public:
       renderer.perspective(glm::radians(70.0f), aspect, 0.1f, 50.0f);
 
       renderer.endShader();
+      
+      for (int i = 0; i < planets.size(); i++) {
+         drawTrail(planets[i].trail);
+      }
       return;
    }
    // load in mesh
