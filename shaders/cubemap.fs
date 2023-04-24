@@ -8,5 +8,6 @@ void main()
 {
 	vec4 cubeMapColor = texture(cubemap, ReflectDir);
 	FragColor = cubeMapColor;
+	// FragColor = vec4(ReflectDir,1.0);
 }
 

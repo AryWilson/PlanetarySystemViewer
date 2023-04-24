@@ -541,6 +541,7 @@ void Renderer::loadCubemap(const std::string& name,
   for (string filename : faces) {
       Image img;
       img.load(filename);
+      std::cout << img.width() << std::endl;
       images.push_back(img);
   }
   loadCubemap(name, images, slot);
@@ -593,7 +594,7 @@ void Renderer::loadTexture(const std::string& name,
   
   img.load(fileName);
   loadTexture(name, img, slot);
-  std::cout << img.width() << std::endl;
+  // std::cout << img.width() << std::endl;
 }
 
 void Renderer::loadTexture(const std::string& name,

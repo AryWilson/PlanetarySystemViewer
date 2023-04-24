@@ -88,7 +88,7 @@ public:
       }
       textures = GetFilenamesInDir("../textures", "png");
 
-      renderer.loadCubemap("space", "../textures/cubemap", 0);
+      renderer.loadCubemap("space", "../textures/cb", 0);
 
       for (int i = 0; i < textures.size(); i++){
          renderer.loadTexture(textures[i], "../textures/" + textures[i], i + 1);
@@ -143,7 +143,7 @@ public:
             int t = rand()%textures.size();
             toAdd.texture = textures[t];
 
-            cout << toAdd.radius << endl;
+            // cout << toAdd.radius << endl;
             planets.push_back(toAdd);
          }
       } else {
@@ -391,7 +391,7 @@ public:
 
       float theta = elapsedTime();
       float v = planet.vel;
-      float s = planet.size;
+      // float s = planet.size;
 
       renderer.rotate(v * theta, vec3(0, 1, 0));
       renderer.rotate(glm::radians(90.0f), vec3(1, 0, 0));
@@ -492,8 +492,10 @@ public:
       update();
       // ---SPACE---
       renderer.beginShader("cubemap");
-      renderer.texture("cubemap", "space");
+      // renderer.texture("cubemap", "space");
+      renderer.cubemap("cubemap","space");
       renderer.skybox(ORBIT + 5);
+      // renderer.skybox(10);
       renderer.endShader();
 
       if (single) {
