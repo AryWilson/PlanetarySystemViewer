@@ -86,19 +86,19 @@ public:
       for (string s : shaders) {
          renderer.loadShader(s, "../shaders/" + s + ".vs", "../shaders/" + s + ".fs");
       }
-      // renderer.loadCubeMap();
       textures = GetFilenamesInDir("../textures", "png");
 
       renderer.loadCubemap("space", "../textures/cubemap", 0);
 
       for (int i = 0; i < textures.size(); i++){
          renderer.loadTexture(textures[i], "../textures/" + textures[i], i + 1);
-      }
-      // renderer.loadTexture("particle", "../textures/particle/particle.png", textures.size() + 1);
+      } 
 
+      renderer.loadTexture("particle", "../textures/particle/particle.png", textures.size() + 1);
 
       initPlanets();
       setMeshDim(mesh);
+      renderer.blendMode(agl::ADD);
    }
 
    void mouseMotion(int x, int y, int dx, int dy) {
@@ -458,7 +458,7 @@ public:
       renderer.pop(); // remove star size
       renderer.pop(); // reset to identity
       for (int i = 0; i < planets.size(); i++) {
-         // drawTrail(planets[i].trail);
+         drawTrail(planets[i].trail);
       }
 
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
@@ -480,7 +480,7 @@ public:
    void draw() {
       // update campos
       update();
-      // ---SPCAE---
+      // ---SPACE---
       renderer.beginShader("cubemap");
       renderer.texture("cubemap", "space");
       renderer.skybox(ORBIT + 5);
