@@ -55,6 +55,7 @@ const int PLANET_COUNT = 6;
 const int PARTICLE_COUNT = 10;
 const float ORBIT = 10;
 const float STAR_SIZE = 1.5;
+const bool RANDOM_GENERATION = false;
 
 class Viewer : public Window
 {
@@ -72,7 +73,6 @@ public:
       update_time = 0;
       material = {0.3f, 0.6f, 0.8f, 15.0f};
       light = {lookPos, vec3(1.0f, 1.0f, 1.0f)};
-      random = false;
       single_planet = 0;
       single = false;
       bbCentx = 0;
@@ -122,7 +122,7 @@ public:
 
    void initPlanets() {
 
-      if(random) {
+      if(RANDOM_GENERATION) {
          float rnd = fmod( (rand()/((float)rand())) , 1.0);
          vector<float> radii;
          for(int i = 0; i< PLANET_COUNT; i++){
@@ -238,18 +238,19 @@ public:
          return false;
       }
       return true;
-
-      // float q = sqrt(pow(r,2) - m2);
+      /*
+      float q = sqrt(pow(r,2) - m2);
       
-      // float t = s - q;
-      // vec3 far_a = v*(s + q);
+      float t = s - q;
+      vec3 far_a = v*(s + q);
       
-      // if(pow(length(l),2) > pow(r,2)){
-      //    return false;
-      // } else {
-      //    return true;
-      // }
-      // return false;
+      if(pow(length(l),2) > pow(r,2)){
+         return false;
+      } else {
+         return true;
+      }
+      return false;
+      */
    }
 
    float sphereIntercetion(vec3 p0, vec3 v, vec3 c, float r){
@@ -533,7 +534,6 @@ protected:
    vector<string> textures;
    vector<Planet> planets;
    vector<string> shaders;
-   bool random;
 
    float update_time;
    bool single;
