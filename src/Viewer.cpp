@@ -1,7 +1,7 @@
 //--------------------------------------------------
 // Author: Ary Wilson
 // Date: 2/18/23
-// Description: Loads PLY files in ASCII format
+// Description: launches space viewer
 //--------------------------------------------------
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -59,8 +59,7 @@ const float STAR_SIZE = 1.5;
 class Viewer : public Window
 {
 public:
-   Viewer() : Window()
-   {
+   Viewer() : Window() {
       eyePos = vec3(7, 0, 0);
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
@@ -73,6 +72,7 @@ public:
       update_time = 0;
       material = {0.3f, 0.6f, 0.8f, 15.0f};
       light = {lookPos, vec3(1.0f, 1.0f, 1.0f)};
+      random = false;
       single_planet = 0;
       single = false;
       bbCentx = 0;
@@ -81,17 +81,15 @@ public:
       d = 1;
    }
 
-   void setup()
-   {
+   void setup() {
       srand(time(NULL));
-      for (string s : shaders)
-      {
+      for (string s : shaders) {
          renderer.loadShader(s, "../shaders/" + s + ".vs", "../shaders/" + s + ".fs");
       }
       // renderer.loadCubeMap();
       textures = GetFilenamesInDir("../textures", "png");
 
-      renderer.loadCubemap("cubemap", "../textures/cubemap", 0);
+      renderer.loadCubemap("space", "../textures/cubemap", 0);
 
       for (int i = 0; i < textures.size(); i++){
          renderer.loadTexture(textures[i], "../textures/" + textures[i], i + 1);
@@ -103,10 +101,8 @@ public:
       setMeshDim(mesh);
    }
 
-   void mouseMotion(int x, int y, int dx, int dy)
-   {
-      if (mouseIsDown(GLFW_MOUSE_BUTTON_LEFT))
-      {
+   void mouseMotion(int x, int y, int dx, int dy) {
+      if (mouseIsDown(GLFW_MOUSE_BUTTON_LEFT)) {
          azimuth -= dx * (0.02f);
          azimuth = fmod(azimuth, 2 * M_PI);
 
@@ -115,12 +111,10 @@ public:
          // elevation = fmod(elevation,M_PI);
          // elevation -= M_PI_2;
 
-         if (elevation >= M_PI_2)
-         {
+         if (elevation >= M_PI_2) {
             elevation = M_PI_2 - 0.01f;
          }
-         if (elevation <= -1 * M_PI_2)
-         {
+         if (elevation <= -1 * M_PI_2) {
             elevation = -1 * M_PI_2 + 0.01f;
          }
       }
@@ -128,7 +122,7 @@ public:
 
    void initPlanets() {
 
-      if(false) {
+      if(random) {
          float rnd = fmod( (rand()/((float)rand())) , 1.0);
          vector<float> radii;
          for(int i = 0; i< PLANET_COUNT; i++){
@@ -191,14 +185,12 @@ public:
       particle.color = vec4(1.0f, 1.0f, .8f, 1.0f);
       particle.size = 0.1;
       particle.pos = vec3(0, 0, 0);
-      for (int i = 0; i < PLANET_COUNT * PARTICLE_COUNT; i++)
-      {
+      for (int i = 0; i < PLANET_COUNT * PARTICLE_COUNT; i++) {
          planets[i / PARTICLE_COUNT].trail.push_back(particle);
       }
    }
    
-   void setMeshDim(PLYMesh mesh)
-   {
+   void setMeshDim(PLYMesh mesh) {
       // find bounding box
       vec3 bbMin = mesh.minBounds();
       vec3 bbMax = mesh.maxBounds();
@@ -212,28 +204,28 @@ public:
       d = std::max(bbXlen, std::max(bbYlen, bbZlen));
    }
 
-vec3 screenToWorld(const vec2& screen){
-    vec4 screenPos = vec4(screen,1,1);
+   vec3 screenToWorld(const vec2& screen){
+      vec4 screenPos = vec4(screen,1,1);
 
-    //flip y coord 
-    screenPos.y = height() - screenPos.y;
+      //flip y coord 
+      screenPos.y = height() - screenPos.y;
 
-    // convert to canonical view coords
-    screenPos.x = 2.0f*((screenPos.x / width()) - 0.5);
-    screenPos.y = 2.0f*((screenPos.y / height()) - 0.5);
+      // convert to canonical view coords
+      screenPos.x = 2.0f*((screenPos.x / width()) - 0.5);
+      screenPos.y = 2.0f*((screenPos.y / height()) - 0.5);
 
-    //convert the particle position to screen coords
-    mat4 projection = renderer.projectionMatrix();
-    mat4 view = renderer.viewMatrix();
-    
-    vec4 worldPos = inverse(projection * view) * screenPos; 
+      //convert the particle position to screen coords
+      mat4 projection = renderer.projectionMatrix();
+      mat4 view = renderer.viewMatrix();
+      
+      vec4 worldPos = inverse(projection * view) * screenPos; 
 
-    // convert from homogeneous to ordinary coord
-    worldPos.x /= worldPos.w;
-    worldPos.y /= worldPos.w;
-    worldPos.z /= worldPos.w;
-    return vec3(worldPos.x, worldPos.y, worldPos.z);
-}
+      // convert from homogeneous to ordinary coord
+      worldPos.x /= worldPos.w;
+      worldPos.y /= worldPos.w;
+      worldPos.z /= worldPos.w;
+      return vec3(worldPos.x, worldPos.y, worldPos.z);
+   }
 
    bool sphereIntercetionBool(vec3 p0, vec3 v, vec3 c, float r){
       vec3 l = c - p0;
@@ -333,53 +325,36 @@ vec3 screenToWorld(const vec2& screen){
       }
    }
 
-
-   void scroll(float dx, float dy)
-   {
+   void scroll(float dx, float dy) {
       radius += dy;
-      if (radius <= 0)
-      {
+      if (radius <= 0) {
          radius = 1;
       }
    }
 
-   void keyUp(int key, int mods)
-   {
-      if (key >= 49 && key <= 49 + 6)
-      {
+   void keyUp(int key, int mods) {
+      if (key >= 49 && key <= 49 + 6) {
          single = true;
          single_planet = key - 49;
       }
-      else if (key == 32)
-      {
+      else if (key == 32) {
          single = false;
       }
    }
 
-   void update()
-   {
-
+   void update() {
       float x = radius * sin(azimuth) * cos(elevation);
       float y = radius * sin(elevation);
       float z = radius * cos(azimuth) * cos(elevation);
       eyePos = vec3(x, y, z);
    }
 
-   // lookAt() changes the camera position and orientation
-   // translate() applies a translation transformation
-   // rotate() applies a rotation transformation
-   // scale() applies a scale transformation
-   // loockAt(vec3(0,0,0),lookPos,upDir);
-
-   void updateTrail(float dt, vector<Particle> mParticles, vec3 position)
-   {
+   void updateTrail(float dt, vector<Particle> mParticles, vec3 position) {
       bool one = agl::random() > 0.5;
 
-      for (int i = 0; i < mParticles.size(); i++)
-      {
+      for (int i = 0; i < mParticles.size(); i++) {
 
-         if (one && mParticles[i].color.w <= 0)
-         {
+         if (one && mParticles[i].color.w <= 0) {
             // one new particle
             mParticles[i].pos = position;
             mParticles[i].color = vec4(1.0, 1.0, 0.8, 1.0);
@@ -394,18 +369,15 @@ vec3 screenToWorld(const vec2& screen){
    }
 
    // render all sprites in pool
-   void drawTrail(vector<Particle> mParticles)
-   {
+   void drawTrail(vector<Particle> mParticles) {
       renderer.texture("image", "particle");
-      for (int i = 0; i < mParticles.size(); i++)
-      {
+      for (int i = 0; i < mParticles.size(); i++) {
          Particle particle = mParticles[i];
          renderer.sprite(particle.pos, particle.color, particle.size);
       }
    }
 
-   void drawSingle(Planet planet)
-   {
+   void drawSingle(Planet planet) {
       // ---SINGLE PLANET
       renderer.beginShader("phong-texture"); // activates shader with given name
       float aspect = ((float)width()) / height();
@@ -416,7 +388,8 @@ vec3 screenToWorld(const vec2& screen){
       float s = planet.size;
 
       renderer.rotate(v * theta, vec3(0, 1, 0));
-      renderer.scale(vec3(s / d, s / d, s / d));
+      // renderer.scale(vec3(s / d, s / d, s / d));
+      renderer.scale(vec3(1.0f / d, 1.0f / d, 1.0f / d));
       renderer.translate(vec3(-1 * bbCentx, -1 * bbCenty, -1 * bbCentz));
       renderer.mesh(mesh);
 
@@ -425,7 +398,7 @@ vec3 screenToWorld(const vec2& screen){
       renderer.setUniform("material.ks", material.ks);
       renderer.setUniform("material.ka", material.ka);
       renderer.setUniform("material.alpha", material.alpha);
-      renderer.setUniform("light.pos", eyePos);
+      renderer.setUniform("light.pos", vec3(1,1,0.5));
       renderer.setUniform("light.col", light.col);
       renderer.lookAt(eyePos, lookPos, upDir);
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
@@ -434,8 +407,7 @@ vec3 screenToWorld(const vec2& screen){
       return;
    }
 
-   void drawSpace(vector<Planet> planets)
-   {
+   void drawSpace(vector<Planet> planets) {
       // ---STAR---
       renderer.beginShader("unlit"); // activates shader with given name
       float aspect = ((float)width()) / height();
@@ -446,8 +418,6 @@ vec3 screenToWorld(const vec2& screen){
       renderer.scale(vec3(1.0f / d, 1.0f / d, 1.0f / d));
       renderer.translate(vec3(-1 * bbCentx, -1 * bbCenty, -1 * bbCentz));
       renderer.push(); // push mesh matrix
-     
-      
 
       renderer.mesh(mesh);
       renderer.endShader();
@@ -460,14 +430,12 @@ vec3 screenToWorld(const vec2& screen){
       float delta = dt();
       update_time += dt();
       bool update = false;
-      if (update_time >= 5)
-      {
+      if (update_time >= 5) {
          update_time = 0;
          update = true;
       }
 
-      for (int i = 0; i < planets.size(); i++)
-      {
+      for (int i = 0; i < planets.size(); i++) {
          renderer.push();// save matrix for star
          renderer.texture("diffuseTexture", planets[i].texture); //?
          float r = planets[i].radius;
@@ -478,8 +446,7 @@ vec3 screenToWorld(const vec2& screen){
          renderer.translate(pos);
          renderer.scale(vec3(s, s, s));
 
-         if (update)
-         {
+         if (update) {
             updateTrail(delta, planets[i].trail, pos);
          }
 
@@ -490,8 +457,7 @@ vec3 screenToWorld(const vec2& screen){
 
       renderer.pop(); // remove star size
       renderer.pop(); // reset to identity
-      for (int i = 0; i < planets.size(); i++)
-      {
+      for (int i = 0; i < planets.size(); i++) {
          // drawTrail(planets[i].trail);
       }
 
@@ -514,17 +480,17 @@ vec3 screenToWorld(const vec2& screen){
    void draw() {
       // update campos
       update();
+      // ---SPCAE---
       renderer.beginShader("cubemap");
+      renderer.texture("cubemap", "space");
       renderer.skybox(ORBIT + 5);
       renderer.endShader();
 
-      if (single)
-      {
+      if (single) {
          // ---SINGLE PLANET
          drawSingle(planets[single_planet]);
       }
-      else
-      {
+      else{
          // ---STAR AND PLANETS
          drawSpace(planets);
       }
@@ -558,6 +524,7 @@ protected:
    vector<string> textures;
    vector<Planet> planets;
    vector<string> shaders;
+   bool random;
 
    float update_time;
    bool single;
@@ -570,8 +537,7 @@ protected:
 
 // void fnExit(){ }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
    // atexit (fnExit);
 
    Viewer viewer;
