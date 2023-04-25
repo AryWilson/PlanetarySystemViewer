@@ -4,16 +4,12 @@ layout (location = 1) in vec3 VertexNormal;
 layout (location = 2) in vec2 VertexTexCoord;
 layout (location = 3) in vec4 VertexTangent;
 
-struct LightInfo {
- vec4 Position; // Light position in eye coords.
- vec3 Intensity; // A,D,S intensity
-};
 
 struct Light{
    vec3 pos;
    vec3 col;
 };
-uniform LightInfo Light;
+uniform Light light;
 
 uniform mat4 ModelViewMatrix;
 uniform mat4 ViewMatrix;

@@ -53,7 +53,7 @@ struct Planet
 };
 
 const int PLANET_COUNT = 6;
-const int PARTICLE_COUNT = 10;
+const int PARTICLE_COUNT = 100;
 const float ORBIT = 10;
 const float STAR_SIZE = 1.5;
 const bool RANDOM_GENERATION = false;
@@ -70,7 +70,7 @@ public:
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
       mesh = PLYMesh("../models/sphere.ply");
-      shaders = {"unlit", "phong-texture"};
+      shaders = {"unlit", "phong-texture", "bumpmap", "gas"};
 
       radius = 10;
       azimuth = 0;
@@ -203,8 +203,8 @@ public:
       }
 
       Particle particle;
-      particle.color = vec4(1.0f, 1.0f, .8f, 1.0f);
-      particle.size = 0.1;
+      particle.color = vec4(0.6f, 0.6f, 0.0f, 0.5f);
+      particle.size = 0.05;
       particle.pos = vec3(0, 0, 0);
       for (int i = 0; i < PLANET_COUNT * PARTICLE_COUNT; i++) {
          planets[i / PARTICLE_COUNT].trail.push_back(particle);
@@ -382,7 +382,7 @@ public:
          if (one && planets[i].trail[i].color.w <= 0) {
             // one new particle
             planets[i].trail[i].pos = position;
-            planets[i].trail[i].color = vec4(1.0, 1.0, 0.8, 1.0);
+            planets[i].trail[i].color = vec4(0.6f, 0.6f, 0.0f, 0.5f);
             one = false;
          }
          else
@@ -411,8 +411,8 @@ public:
       // ---SINGLE PLANET
       // renderer.beginShader(planet.shader); // activates shader with given name
       // renderer.beginShader("phong-texture");
-      renderer.beginShader("gas"); 
-      // renderer.beginShader("bumpmap");
+      // renderer.beginShader("gas"); 
+      renderer.beginShader("bumpmap");
 
       float aspect = ((float)width()) / height();
       renderer.texture("diffuseTexture", planet.texture);
@@ -436,6 +436,7 @@ public:
       renderer.setUniform("material.alpha", material.alpha);
       renderer.setUniform("light.pos", vec3(1,1,0.5));
       renderer.setUniform("light.col", light.col);
+      renderer.setUniform("time", theta);
       renderer.lookAt(eyePos, lookPos, upDir);
       renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
 
@@ -483,7 +484,7 @@ public:
          renderer.rotate(glm::radians(90.0f), vec3(1, 0, 0));
          renderer.scale(vec3(s, s, s));
 
-         if (true){//update) {
+         if (update){
             updateTrail(delta, i, _pos);
          }
          planets[i].position = _pos;
