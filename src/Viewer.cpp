@@ -91,14 +91,14 @@ public:
       }
       textures = GetFilenamesInDir("../textures", "png");
 
-      renderer.loadCubemap("space", "../textures/cb", 0);
+      renderer.loadCubemap("space", "../textures/space", 0);
 
-      for (int i = 0; i < textures.size(); i++){
+      for (int i = 0; i < textures.size()*2; i+=2){
          renderer.loadTexture(textures[i], "../textures/" + textures[i], i + 1);
+         renderer.loadTexture(textures[i+1], "../textures/normal/" + textures[i+1], i + 2);
       } 
 
-      renderer.loadTexture("particle", "../textures/particle/particle.png", textures.size() + 1);
-      renderer.loadTexture("surfaceNormal", "../textures/normals/surfaceNormal.png", textures.size() + 2);
+      renderer.loadTexture("particle", "../textures/particle/particle.png", textures.size()*2 + 1);
 
       initPlanets();
       setMeshDim(mesh);
@@ -141,7 +141,7 @@ public:
             if (toAdd.size > 0.4){
                toAdd.shader = "gas";
             } else {
-               toAdd.shader = "rock";
+               toAdd.shader = "bumpmap";
             }
 
             toAdd.radius = radii[i];
@@ -409,14 +409,14 @@ public:
 
    void drawSingle(Planet planet) {
       // ---SINGLE PLANET
-      // renderer.beginShader(planet.shader); // activates shader with given name
+      renderer.beginShader(planet.shader); // activates shader with given name
       // renderer.beginShader("phong-texture");
       // renderer.beginShader("gas"); 
-      renderer.beginShader("bumpmap");
+      // renderer.beginShader("bumpmap");
 
       float aspect = ((float)width()) / height();
       renderer.texture("diffuseTexture", planet.texture);
-      renderer.texture("normalMapTexture", "surfaceNormal");
+      renderer.texture("normalMapTexture", planet.texture);
 
       float theta = elapsedTime();
       float v = planet.vel;
