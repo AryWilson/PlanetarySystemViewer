@@ -36,6 +36,6 @@ void main()
 
  vec3 v = normalize(VertexNormal);
  vec2 co = uv*sin(.001*time);
- vec3 pos = VertexPosition + VertexNormal * rand(co) * .05;
+ vec3 pos = VertexPosition + v * rand(co) * .05;
  gl_Position = MVP * vec4(pos,1.0);
 }

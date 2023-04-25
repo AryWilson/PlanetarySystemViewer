@@ -35,8 +35,7 @@ struct Light
 struct Particle
 {
    glm::vec3 pos;
-   glm::vec4 color;
-   float rot;
+   float alpha;
    float size;
 };
 
@@ -57,6 +56,7 @@ const int PARTICLE_COUNT = 100;
 const float ORBIT = 10;
 const float STAR_SIZE = 1.5;
 const bool RANDOM_GENERATION = false;
+const vec3 PARTICLE_COL = vec3(0.6f, 0.6f, 0.0f);
 
 class Viewer : public Window
 {
@@ -203,7 +203,7 @@ public:
       }
 
       Particle particle;
-      particle.color = vec4(0.6f, 0.6f, 0.0f, 0.5f);
+      particle.alpha = 0.5f;
       particle.size = 0.05;
       particle.pos = vec3(3, 0, 0);
       for (int i = 0; i < PLANET_COUNT * PARTICLE_COUNT; i++) {
@@ -379,16 +379,17 @@ public:
 
       for (int i = 0; i < planets[idx].trail.size(); i++) {
 
-         if (one && planets[idx].trail[i].color.w <= 0) {
+         if (one && planets[idx].trail[i].alpha <= 0) {
             // one new particle
             planets[idx].trail[i].pos = position;
-            planets[idx].trail[i].color = vec4(0.6f, 0.6f, 0.0f, 0.5f);
+            planets[idx].trail[i].alpha = 0.5f;
             one = false;
          }
          else
          {
             // updates the opacity
-            planets[idx].trail[i].color.w -= dt;
+            planets[idx].trail[i].alpha -= 0.2*dt;
+            planets[idx].trail[i].size -= 0.1*dt;
          }
       }
    }
@@ -402,7 +403,7 @@ public:
       // renderer.rotate(eyePos.z,vec3(0,0,1));
       for (int i = 0; i < mParticles.size(); i++) {
          Particle particle = mParticles[i];
-         renderer.sprite(particle.pos, particle.color, particle.size);
+         renderer.sprite(particle.pos, vec4(PARTICLE_COL,particle.alpha), particle.size);
       }
       renderer.endShader();
    }
