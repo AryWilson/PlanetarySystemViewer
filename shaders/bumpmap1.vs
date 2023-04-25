@@ -18,20 +18,21 @@ uniform mat4 ProjMatrix;
 uniform mat4 MVP;
 
 out vec3 ViewDir;
-
-out vec3 pEye;
-out vec3 nEye;
 out vec2 uv;
 out vec3 lightDir;
 void main()
 {
  // Transform normal and tangent to eye space
  vec3 norm = normalize(NormalMatrix * VertexNormal);
- vec3 tang = normalize(NormalMatrix * vec3(1,0,0));
+ vec3 tempTan = vec3(VertexNormal.y,VertexNormal.z, VertexNormal.x);
+ if(VertexNormal.x == VertexNormal.y && VertexNormal.x == VertexNormal.z){
+   tempTan = vec3(1,0,0);
+ }
+ vec3 tang = normalize(NormalMatrix * tempTan); //need tangen from external
 
  // Compute the binormal
- vec3 binormal = normalize( cross( norm, tang ) ) *
- VertexTangent.w;
+ vec3 binormal = normalize( cross( norm, tang ) ) * VertexTangent.w;
+ tang = normalize( cross( binormal, norm) ) * VertexTangent.w;
 
  // Matrix for transformation to tangent space
  mat3 toObjectLocal = mat3(
@@ -46,8 +47,8 @@ void main()
  // Transform light dir. and view dir. to tangent space
  lightDir = normalize( toObjectLocal * (light.pos - pos) );
  ViewDir = toObjectLocal * normalize(-pos);
- // Pass along the texture coordinate
 
+ // Pass along the texture coordinate
  uv = VertexTexCoord;
  gl_Position = MVP * vec4(VertexPosition,1.0);
 }

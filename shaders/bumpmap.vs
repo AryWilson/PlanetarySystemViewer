@@ -1,8 +1,8 @@
 #version 400
 
-layout (location = 0) in vec3 vPositions;
-layout (location = 1) in vec3 vNormals;
-layout (location = 2) in vec2 vTextureCoords;
+layout (location = 0) in vec3 VertexPosition;
+layout (location = 1) in vec3 VertexNormal;
+layout (location = 2) in vec2 VertexPosition;
 
 struct Light {
   vec3 pos;  // 0 => directional light; 1 => point light
@@ -22,9 +22,10 @@ out vec2 uv;
 
 void main()
 {
-  position = ModelViewMatrix * vec4( vPositions, 1.0);
+  position = ModelViewMatrix * vec4( VertexPosition, 1.0);
   lightpos = ViewMatrix * vec4(light.pos,1.0);
-  normal = NormalMatrix * vNormals;
-  uv = vTextureCoords;
-  gl_Position = MVP * vec4(vPositions, 1.0);
+  normal = NormalMatrix * VertexNormal;
+
+  uv = VertexPosition;
+  gl_Position = MVP * vec4(VertexPosition, 1.0);
 }

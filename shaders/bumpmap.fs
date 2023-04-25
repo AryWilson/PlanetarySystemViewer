@@ -17,9 +17,6 @@ uniform sampler2D normalMapTexture;
 
 uniform Light light; 
 uniform Material material;
-uniform mat4 ModelViewMatrix;
-uniform mat3 NormalMatrix;
-uniform mat4 MVP;
 
 in vec4 position;
 in vec4 lightpos;
@@ -35,8 +32,8 @@ vec3 phongModel(in vec3 ePos, in vec3 eNormal) {
 
   vec3 ambient = light.col * material.ka;
 
-  float angle = max( dot(L,eNormal), 0.0 ); 
-  vec3 diffuse = angle * light.col * material.kd;
+  float sDotN = max( dot(L,eNormal), 0.0 ); 
+  vec3 diffuse = sDotN * light.col * material.kd;
 
   vec3 mainColor = texture(diffuseTexture, uv).rgb;
   vec3 color = mainColor*(ambient + diffuse);
@@ -48,7 +45,8 @@ vec3 phongModel(in vec3 ePos, in vec3 eNormal) {
 }
 
 void main() {
-  vec3 texNormal = normalize(2*(texture(normalMapTexture, uv).xyz-0.5f));
+//   vec3 texNormal = normalize(2*(texture(normalMapTexture, uv).xyz-0.5f));
+  vec3 texNormal = texture(normalMapTexture, uv);
   vec3 color = phongModel(position.xyz, texNormal);
   FragColor = vec4(color, 1.0);
 }

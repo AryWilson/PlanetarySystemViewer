@@ -1,8 +1,6 @@
 #version 400
 
 in vec3 ViewDir;
-in vec3 pEye;
-in vec3 nEye;
 in vec2 uv;
 in vec3 lightDir;
 
@@ -33,8 +31,7 @@ vec4 phongModel( vec3 norm, vec3 diffR, vec4 texColor) {
     vec3 spec = vec3(0.0);
 
     if( sDotN > 0.0 ) {
-        spec = light.col * material.ks * pow( max( dot(r,ViewDir), 0.0 ),
-    material.alpha);
+        spec = light.col * material.ks * pow( max( dot(r,ViewDir), 0.0 ), material.alpha);
     } 
 
     return vec4((ambient + diffuse),1.0) * texColor + vec4(spec, 1.0);
