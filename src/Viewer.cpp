@@ -205,7 +205,7 @@ public:
       Particle particle;
       particle.color = vec4(0.6f, 0.6f, 0.0f, 0.5f);
       particle.size = 0.05;
-      particle.pos = vec3(0, 0, 0);
+      particle.pos = vec3(3, 0, 0);
       for (int i = 0; i < PLANET_COUNT * PARTICLE_COUNT; i++) {
          planets[i / PARTICLE_COUNT].trail.push_back(particle);
       }
@@ -373,22 +373,22 @@ public:
       eyePos = vec3(x, y, z);
    }
 
-   void updateTrail(float dt, int i, vec3 position) {
+   void updateTrail(float dt, int idx, vec3 position) {
       bool one = agl::random() > 0.5;
       // vector<Particle> mParticles = planets[i].trail;
 
-      for (int i = 0; i < planets[i].trail.size(); i++) {
+      for (int i = 0; i < planets[idx].trail.size(); i++) {
 
-         if (one && planets[i].trail[i].color.w <= 0) {
+         if (one && planets[idx].trail[i].color.w <= 0) {
             // one new particle
-            planets[i].trail[i].pos = position;
-            planets[i].trail[i].color = vec4(0.6f, 0.6f, 0.0f, 0.5f);
+            planets[idx].trail[i].pos = position;
+            planets[idx].trail[i].color = vec4(0.6f, 0.6f, 0.0f, 0.5f);
             one = false;
          }
          else
          {
             // updates the opacity
-            planets[i].trail[i].color.w -= dt;
+            planets[idx].trail[i].color.w -= dt;
          }
       }
    }
