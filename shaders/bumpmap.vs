@@ -27,7 +27,7 @@ void main()
 {
  // Transform normal and tangent to eye space
  vec3 norm = normalize(NormalMatrix * VertexNormal);
- vec3 tang = normalize(NormalMatrix * vec3(VertexTangent));
+ vec3 tang = normalize(NormalMatrix * vec3(1,0,0));
 
  // Compute the binormal
  vec3 binormal = normalize( cross( norm, tang ) ) *
@@ -44,8 +44,7 @@ void main()
  vec4(VertexPosition,1.0) );
 
  // Transform light dir. and view dir. to tangent space
- lightDir = normalize( toObjectLocal *
- (light.pos - pos) );
+ lightDir = normalize( toObjectLocal * (light.pos - pos) );
  ViewDir = toObjectLocal * normalize(-pos);
  // Pass along the texture coordinate
 
