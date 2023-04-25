@@ -49,7 +49,7 @@ vec3 phongModel(in vec3 ePos, in vec3 eNormal) {
 
 void main() {
 //   vec3 texNormal = normalize(2*(texture(normalMapTexture, uv).xyz-0.5f));
-  vec3 texNormal = texture(normalMapTexture, uv);
+  vec3 texNormal = texture(normalMapTexture, uv).xyz;
   vec3 color = phongModel(position.xyz, texNormal);
   FragColor = vec4(color, 1.0);
 }

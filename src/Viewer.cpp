@@ -70,7 +70,7 @@ public:
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
       mesh = PLYMesh("../models/sphere.ply");
-      shaders = {"unlit", "phong-texture", "bumpmap", "gas"};
+      shaders = {"unlit", "phong-texture", "bumpmap"};
 
       radius = 10;
       azimuth = 0;
