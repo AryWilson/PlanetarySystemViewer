@@ -91,7 +91,7 @@ public:
       }
       textures = GetFilenamesInDir("../textures", "png");
 
-      renderer.loadCubemap("space", "../textures/space1", 0);
+      renderer.loadCubemap("space", "../textures/cb/space", 0);
 
       for (int i = 0; i < textures.size(); i++){
          renderer.loadTexture(textures[i], "../textures/" + textures[i], i + 1);
