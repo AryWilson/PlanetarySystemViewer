@@ -76,7 +76,7 @@ public:
       azimuth = 0;
       elevation = 0;
       update_time = 0;
-      material = {0.2f, 0.9f, 0.3f, 15.0f};
+      material = {0.2f, 1, 0.3f, 20.0f};
       light = {lookPos, vec3(1.0f, 1.0f, 1.0f)};
       single_planet = 0;
       single = false;

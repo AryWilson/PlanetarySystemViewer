@@ -28,7 +28,7 @@ out vec4 FragColor;
 vec3 phongModel(in vec3 ePos, in vec3 eNormal) {
   vec3 L = normalize(lightpos.xyz - lightpos.w * ePos);
   vec3 v = normalize(-ePos);
-  vec3 r = normalize(reflect(v, eNormal));
+  vec3 r = normalize(reflect(L, eNormal));
 
   vec3 ambient = light.col * material.ka;
 
