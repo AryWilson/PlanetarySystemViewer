@@ -24,6 +24,7 @@ void main()
 {
   position = ModelViewMatrix * vec4( VertexPosition, 1.0);
   lightpos = ViewMatrix * vec4(light.pos,1.0);
+
   normal = NormalMatrix * VertexNormal;
 
   uv = VertexTexCoord;

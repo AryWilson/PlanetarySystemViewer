@@ -28,10 +28,7 @@ out vec4 FragColor;
 vec3 phongModel(in vec3 ePos, in vec3 eNormal) {
   vec3 L = normalize(lightpos.xyz - lightpos.w * ePos);
   vec3 v = normalize(-ePos);
-//   vec3 r = normalize(reflect(v, normalize(eNormal)));
-//   vec3 r = reflect( -lightpos.xyz, eNormal );
-  vec3 r = reflect( -L, eNormal );
-
+  vec3 r = normalize(reflect(v, eNormal));
 
   vec3 ambient = light.col * material.ka;
 
@@ -44,12 +41,14 @@ vec3 phongModel(in vec3 ePos, in vec3 eNormal) {
   float b = max(dot(r, -v), 0.0);
   vec3 spec = light.col * material.ks * pow(b, material.alpha);
 
-  return color + .15*spec;
+  return color + spec;
 }
 
 void main() {
 //   vec3 texNormal = normalize(2*(texture(normalMapTexture, uv).xyz-0.5f));
   vec3 texNormal = texture(normalMapTexture, uv).xyz;
-  vec3 color = phongModel(position.xyz, texNormal);
+  // vec3 norm = normalize(normal + texNormal);
+  vec3 norm = 1.25*normalize(normal + texNormal);
+  vec3 color = phongModel(position.xyz, norm);
   FragColor = vec4(color, 1.0);
 }

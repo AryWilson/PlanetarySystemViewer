@@ -52,10 +52,10 @@ struct Planet
 };
 
 const int PLANET_COUNT = 6;
-const int PARTICLE_COUNT = 100;
-const float ORBIT = 10;
+const int PARTICLE_COUNT = 10;
+const float ORBIT = 20;
 const float STAR_SIZE = 1.5;
-const bool RANDOM_GENERATION = false;
+const bool RANDOM_GENERATION = true;
 const vec3 PARTICLE_COL = vec3(0.6f, 0.6f, 0.0f);
 
 class Viewer : public Window
@@ -70,13 +70,13 @@ public:
       lookPos = vec3(0, 0, 0);
       upDir = vec3(0, 1, 0);
       mesh = PLYMesh("../models/sphere.ply");
-      shaders = {"unlit", "phong-texture", "bumpmap"};
+      shaders = {"unlit", "phong-texture", "gas", "bumpmap"};
 
       radius = 10;
       azimuth = 0;
       elevation = 0;
       update_time = 0;
-      material = {0.3f, 0.6f, 0.8f, 15.0f};
+      material = {0.2f, 0.9f, 0.1f, 10.0f};
       light = {lookPos, vec3(1.0f, 1.0f, 1.0f)};
       single_planet = 0;
       single = false;
@@ -91,18 +91,17 @@ public:
       }
       textures = GetFilenamesInDir("../textures", "png");
 
-      renderer.loadCubemap("space", "../textures/space", 0);
+      renderer.loadCubemap("space", "../textures/space1", 0);
 
-      for (int i = 0; i < textures.size()*2; i+=2){
+      for (int i = 0; i < textures.size(); i++){
          renderer.loadTexture(textures[i], "../textures/" + textures[i], i + 1);
-         renderer.loadTexture(textures[i+1], "../textures/normal/" + textures[i+1], i + 2);
+         renderer.loadTexture("n_"+textures[i], "../textures/normal/" + textures[i], i + 2);
       } 
 
       renderer.loadTexture("particle", "../textures/particle/particle.png", textures.size()*2 + 1);
 
-      initPlanets();
+      initPlanets(RANDOM_GENERATION);
       setMeshDim(mesh);
-      // renderer.blendMode(agl::ADD);
    }
 
    void mouseMotion(int x, int y, int dx, int dy) {
@@ -124,13 +123,14 @@ public:
       }
    }
 
-   void initPlanets() {
+   void initPlanets(bool random) {
+      planets.clear();
 
-      if(RANDOM_GENERATION) {
+      if(random) {
          float rnd = fmod( (rand()/((float)rand())) , 1.0);
          vector<float> radii;
          for(int i = 0; i< PLANET_COUNT; i++){
-            radii.push_back((rnd * (ORBIT - (STAR_SIZE+1))) + STAR_SIZE+1);
+            radii.push_back((rnd * (ORBIT - (STAR_SIZE+2))) + STAR_SIZE+2);
             rnd = fmod( (rand()/((float)rand())) , 1.0);
          }
          std::sort(radii.begin(), radii.end());
@@ -138,7 +138,7 @@ public:
             Planet toAdd;
             rnd = fmod( (rand()/((float)rand())) , 1.0);
             toAdd.size = rnd * (0.7 - 0.1) + 0.1;
-            if (toAdd.size > 0.4){
+            if (toAdd.size > 0.6){
                toAdd.shader = "gas";
             } else {
                toAdd.shader = "bumpmap";
@@ -147,7 +147,7 @@ public:
             toAdd.radius = radii[i];
 
             rnd = fmod( (rand()/((float)rand())) , 1.0);
-            toAdd.vel = (rnd * (0.2 - 0.05) + 0.05) * (ORBIT + 0.5 - radii[i]);
+            toAdd.vel = (rnd * 0.05) * (ORBIT + 0.5- radii[i]);
 
             int t = rand()%textures.size();
             toAdd.texture = textures[t];
@@ -166,9 +166,9 @@ public:
          a.radius = 3.0f;
          b.radius = 4.0f;
          c.radius = 5.0f;
-         d.radius = 8.0f;
-         e.radius = 10.0f;
-         f.radius = 11.0f;
+         d.radius = 6.0f;
+         e.radius = 7.0f;
+         f.radius = 10.0f;
          a.position = vec3(0);
          b.position = vec3(0);
          c.position = vec3(0);
@@ -188,8 +188,8 @@ public:
          d.texture = "gas.png";
          e.texture = "swirl1.png";
          f.texture = "swirl2.png";
-         a.shader = "rock";
-         b.shader = "rock";
+         a.shader = "bumpmap";
+         b.shader = "bumpmap";
          c.shader = "gas";
          d.shader = "gas";
          e.shader = "gas";
@@ -203,7 +203,7 @@ public:
       }
 
       Particle particle;
-      particle.alpha = 0.5f;
+      particle.alpha = 0.0f;
       particle.size = 0.05;
       particle.pos = vec3(3, 0, 0);
       for (int i = 0; i < PLANET_COUNT * PARTICLE_COUNT; i++) {
@@ -363,6 +363,11 @@ public:
       }
       else if (key == 32) {
          single = false;
+      } else if (key == 82){
+         initPlanets(true);
+
+      } else if (key == 78){
+         initPlanets(false);
       }
    }
 
@@ -373,29 +378,32 @@ public:
       eyePos = vec3(x, y, z);
    }
 
-   void updateTrail(float dt, int idx, vec3 position) {
-      bool one = agl::random() > 0.5;
-      // vector<Particle> mParticles = planets[i].trail;
+   void updateTrail(int idx, vec3 position) {
+      bool one = true;
 
       for (int i = 0; i < planets[idx].trail.size(); i++) {
 
          if (one && planets[idx].trail[i].alpha <= 0) {
+            
+
             // one new particle
             planets[idx].trail[i].pos = position;
-            planets[idx].trail[i].alpha = 0.5f;
+            planets[idx].trail[i].size = 0.05f;
+            planets[idx].trail[i].alpha = 1.0f;
             one = false;
          }
          else
          {
             // updates the opacity
-            planets[idx].trail[i].alpha -= 0.2*dt;
-            planets[idx].trail[i].size -= 0.1*dt;
+            planets[idx].trail[i].alpha -= 0.05;
+            planets[idx].trail[i].size -= 0.0001;
          }
       }
    }
 
    // render all sprites in pool
    void drawTrail(vector<Particle> mParticles) {
+
       renderer.beginShader("sprite");
       renderer.texture("image", "particle");
       // renderer.rotate(eyePos.x,vec3(1,0,0));
@@ -403,6 +411,7 @@ public:
       // renderer.rotate(eyePos.z,vec3(0,0,1));
       for (int i = 0; i < mParticles.size(); i++) {
          Particle particle = mParticles[i];
+         if (particle.size < 0) {particle.size = 0;}
          renderer.sprite(particle.pos, vec4(PARTICLE_COL,particle.alpha), particle.size);
       }
       renderer.endShader();
@@ -417,7 +426,7 @@ public:
 
       float aspect = ((float)width()) / height();
       renderer.texture("diffuseTexture", planet.texture);
-      renderer.texture("normalMapTexture", planet.texture);
+      renderer.texture("normalMapTexture", "n_"+planet.texture);
 
       float theta = elapsedTime();
       float v = planet.vel;
@@ -439,7 +448,7 @@ public:
       renderer.setUniform("light.col", light.col);
       renderer.setUniform("time", theta);
       renderer.lookAt(eyePos, lookPos, upDir);
-      renderer.perspective(glm::radians(60.0f), aspect, 0.1f, 50.0f);
+      renderer.perspective(glm::radians(60.0f), aspect, 0.1f, ORBIT*10);
 
       renderer.endShader();
       return;
@@ -468,10 +477,12 @@ public:
       float delta = dt();
       update_time += delta;
       bool update = false;
-      if (update_time >= 1) {
+      if (update_time >= .1) {
          update_time = 0;
          update = true;
       }
+      renderer.pop(); // remove star size
+      renderer.pop(); // reset to identity
 
       for (int i = 0; i < planets.size(); i++) {
          renderer.push();// save matrix for star
@@ -486,7 +497,7 @@ public:
          renderer.scale(vec3(s, s, s));
 
          if (update){
-            updateTrail(delta, i, _pos);
+            updateTrail(i, _pos);
          }
          planets[i].position = _pos;
          // planets[i].pos = vec3(renderer.getModelMatrix() * vec4(pos,1));
@@ -496,8 +507,7 @@ public:
          renderer.pop(); // reset to mesh matrix
       }
 
-      renderer.pop(); // remove star size
-      renderer.pop(); // reset to identity
+      
       
 
       renderer.setUniform("ProjMatrix", renderer.projectionMatrix());
@@ -508,13 +518,18 @@ public:
       renderer.setUniform("light.pos", light.pos);
       renderer.setUniform("light.col", light.col);
       renderer.lookAt(eyePos, lookPos, upDir);
-      renderer.perspective(glm::radians(70.0f), aspect, 0.1f, 50.0f);
+      renderer.perspective(glm::radians(60.0f), aspect, 0.1f, ORBIT*10);
 
       renderer.endShader();
+
+      renderer.blendMode(agl::ADD);
       
       for (int i = 0; i < planets.size(); i++) {
          drawTrail(planets[i].trail);
       }
+      renderer.blendMode(agl::DEFAULT);
+
+
       return;
    }
    // load in mesh
@@ -527,7 +542,7 @@ public:
       renderer.beginShader("cubemap");
       // renderer.texture("cubemap", "space");
       renderer.cubemap("cubemap","space");
-      renderer.skybox(ORBIT + 10);
+      renderer.skybox(ORBIT*2);
       // renderer.skybox(10);
       renderer.endShader();
 
