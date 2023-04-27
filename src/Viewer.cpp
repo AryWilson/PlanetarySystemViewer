@@ -384,8 +384,6 @@ public:
       for (int i = 0; i < planets[idx].trail.size(); i++) {
 
          if (one && planets[idx].trail[i].alpha <= 0) {
-            
-
             // one new particle
             planets[idx].trail[i].pos = position;
             planets[idx].trail[i].size = 0.05f;
@@ -395,8 +393,8 @@ public:
          else
          {
             // updates the opacity
-            planets[idx].trail[i].alpha -= 0.05;
-            planets[idx].trail[i].size -= 0.0001;
+            planets[idx].trail[i].alpha -= 1.0f/PARTICLE_COUNT;
+            planets[idx].trail[i].size -= 0.05f/PARTICLE_COUNT;
          }
       }
    }
