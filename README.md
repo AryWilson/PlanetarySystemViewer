@@ -174,14 +174,19 @@ http://staff.ustc.edu.cn/~zhuang/hpg/books/Packtpub.OpenGL.4.0.Shading.Language.
 
 
 *Free online tool converts depth maps to normal maps*
+
 https://cpetry.github.io/NormalMap-Online/
 
 
 *The bump map vertex and fragment shaders are modified from:*
+
 https://github.com/alinen/agl/blob/main/shaders/bumpmap.vs 
+
 https://github.com/alinen/agl/blob/main/shaders/bumpmap.fs
 
 
 *The intersection test was created using:*
+
 https://www.lighthouse3d.com/tutorials/maths/ray-sphere-intersection/
+
 Möller Tomas, et al. “Chapter 22 Intersection Test Methods.” Real-Time Rendering, Fourth ed., CRC Press, 2019, pp. 957–959. 
