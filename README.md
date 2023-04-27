@@ -47,6 +47,8 @@ PlanetarySystemViewer/build $ ../bin/Viewer
 
 ## Controls
 
+ - Use the scroll to zoom in or out
+ - Click and drag the mouse around the screen to change the orientation
  - In the planetary view, click on a planet to navigate to it
  - Hit the space key to return to the planetary view
  - Press r to randomize the scene or the planet
