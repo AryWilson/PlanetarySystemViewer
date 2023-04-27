@@ -45,6 +45,14 @@ To run each program from build, you would type
 PlanetarySystemViewer/build $ ../bin/Viewer
 ```
 
+## Controls
+
+ Markup : - In the planetary view, click on a planet to navigate to it
+ - Hit the space key to return to the planetary view
+ - Press r to randomize the scene or the planet
+ - Press n to return to the default scene
+
+
 ## Features
 
 Background implemented with a unique cubemap.
