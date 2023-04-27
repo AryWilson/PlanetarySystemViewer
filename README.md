@@ -47,7 +47,7 @@ PlanetarySystemViewer/build $ ../bin/Viewer
 
 ## Controls
 
- Markup : - In the planetary view, click on a planet to navigate to it
+ - In the planetary view, click on a planet to navigate to it
  - Hit the space key to return to the planetary view
  - Press r to randomize the scene or the planet
  - Press n to return to the default scene
@@ -167,7 +167,7 @@ The direction of the ray is calculated by taking the x and y of the mouse positi
 
 
 ### Potential Improvements
- Markup : - The clicking mechanism should use the distance of the intersection to determine which planet was clicked. 
+ - The clicking mechanism should use the distance of the intersection to determine which planet was clicked. 
  - The textures and normal could be better designed to hide the seam. 
  - More textures could be offered.
  - Multiple sky maps could be scrolled through. 
