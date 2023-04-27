@@ -150,20 +150,23 @@ Cube maps take in 6 images and uses a shader to display them on the inside of 6 
 The particles are initialized without opacity (so that they are not visible until the planets beign to move). Each planet gets its own particle object pool. Meaning that as the particles fade from view the memory they took is repurposed for the new particles. This is usually done to preserve space in large particle systems, however the default settings of the program only gives each planet ten particles. Every tenth of a second, one (no longer visible) particle from each of the planet’s trail is updated to the current position and with full size and opacity. Every other particle in the trail fades and shrinks. 
 
 ### Clicking
-The clicking mechanism is simplified from Real-Time Rendering cited in the Resources and Referenced section at the bottom. To tell if a ray intersects a sphere requires the starting position of the ray (vec3 P¬0), the direction of the ray (vec3 v), the position of the center of the sphere (vec3 c) and the radius of the sphere (float r). The former two are calculated in Viewer.cpp and the latter is stored in the Planet vector. 
-![Alt text](/images/ClickMechanism.gif?raw=true)
+The clicking mechanism is simplified from Real-Time Rendering cited in the Resources and Referenced section at the bottom. To tell if a ray intersects a sphere requires the starting position of the ray (vec3 P¬0), the direction of the ray (vec3 v), the position of the center of the sphere (vec3 c) and the radius of the sphere (float r). The former two are calculated in Viewer.cpp and the latter is stored in the Planet vector.
+
+![Alt text](/images/ClickMechanism.png?raw=true)
+
 My program uses r + 0.5 as the radius. This gives small and/or fast planets a useful buffer for the viewer. The algorithm calculates the vector from the ray starting position to the center of the sphere. It then projects this vector onto the ray, giving us the length of s, as well as the length of 2 sides of a right triangle. This allows us to calculate m, the closes distance from the center of the sphere to the ray. If m is less than the radius, the sphere is intersected. There are more sophisticated algorithms covered in the reference list that allow you to determine the angle the ray hits the sphere as well as determine which sphere side of the sphere was intersected first (if the ray intersects more than one point). My program does not use these. 
 The direction of the ray is calculated by taking the x and y of the mouse position when the click occurred, remapping them to [-1,1], and multiplying it by the inverse of the view and projection matrices to get it into world coordinates. The starting position of the ray is assumed to be the remapped x and y coordinates with the z coordinate of the near projection plane. The matrices and z coordinate are stored in the agl/renderer.cpp class.
 
 
-### Future Improvements
-The clicking mechanism should use the distance of the intersection to determine which planet was clicked. 
-The textures and normal should be smoothed out (to better hide the seem). And more textures should be offered.
-Sky maps should also be able to be scrolled through. 
-The mobile vertex shader should account for the seem when moving. Vertices on each end should move together, which should be able to be calculated using the uv mapping.
-The algorithm used to randomize the planets is very loosely based on physics, but could be made much better.
-Non-flat orbits should be used.
-Moons, rings, and perhaps water should be integrated on the planets surface.
+### Potential Improvements
+ Markup : - The clicking mechanism should use the distance of the intersection to determine which planet was clicked. 
+ - The textures and normal could be better designed to hide the seam. 
+ - More textures could be offered.
+ - Multiple sky maps could be scrolled through. 
+ - The mobile vertex shader could account for the seem when moving. Vertices on each end should move together, which should be able to be calculated using the uv mapping.
+ - The algorithm used to randomize the planets is very loosely based on physics, but could be made much better.
+ - Non-flat orbits could be used.
+ - Moons, rings, and perhaps water should be integrated on the planets surface.
 
 
  
