@@ -173,7 +173,7 @@ Moons, rings, and perhaps water should be integrated on the planets surface.
 http://staff.ustc.edu.cn/~zhuang/hpg/books/Packtpub.OpenGL.4.0.Shading.Language.Cookbook.Jul.2011.pdf 
 
 
-*Free online tool converts depth maps to normal maps*
+*Free online tool that converts depth maps to normal maps:*
 
 https://cpetry.github.io/NormalMap-Online/
 
